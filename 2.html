@@ -436,7 +436,7 @@ function setStyle(id,property,value){const el=getEl(id);if(el)el.style[property]
 function addClass(id,className){const el=getEl(id);if(el)el.classList.add(className);}
 function removeClass(id,className){const el=getEl(id);if(el)el.classList.remove(className);}
 const DB_NAME="ReviveSubsDB",STORE_NAME="appDataStore",DB_VERSION=1,MAIN_DATA_KEY="mainApplicationData";
-let data={version:"2.9.8"}; // Incremented version
+let data={version:"2.9.8"};
 const PROJECT_BASE_CONFIG={formFields:['projectStatus','totalEpisodes','completedEpisodesProject','projectTranslator','projectEditor','projectTimer','projectSubtitler','translationPrice','editingPrice','timerPrice','subtitlerPrice','translationBonus','editingBonus','timerBonus','subtitlerBonus','rawUrl','projectNotes'],numberFields:['totalEpisodes','completedEpisodesProject','translationPrice','editingPrice','timerPrice','subtitlerPrice','translationBonus','editingBonus','timerBonus','subtitlerBonus'],selectFields:['projectStatus','projectTranslator','projectEditor','projectTimer','projectSubtitler']};
 const PROJECT_CONFIG={anime:{...PROJECT_BASE_CONFIG,type:'anime',nameLabel:'اسم الأنمي',modalTitleAdd:'إضافة أنمي جديد',modalTitleEdit:'تعديل بيانات الأنمي',fieldsContainerId:'malFieldsContainer',altFieldsContainerId:'tvdbFieldsContainer',fetchDataFnName:'fetchExternalData',fetchButtonId:'fetchMalDataBtn',fetchLoaderId:'malFetchLoader',externalApiFields:['projectMalId','projectUrl','projectImageUrl','projectAnimeType','projectStudio','projectSource','projectPremiered','projectGenres','projectThemes','projectDuration','projectRating','projectScore'],dataProperties:{malId:'projectMalId',url:'projectUrl',imageUrl:'projectImageUrl',animeType:'projectAnimeType',studio:'projectStudio',source:'projectSource',premiered:'projectPremiered',genres:'projectGenres',themes:'projectThemes',duration:'projectDuration',rating:'projectRating',score:'projectScore'},genreProperty:'genres',posterProperty:'imageUrl',yearProperty:'premiered',ratingProperty:'score',durationProperty:'duration',externalLinkProperty:'url',externalLinkName:'MAL',primaryLinkSelector:'.mal-link',secondaryLinkSelector:'.tmdb-link',statusFilterId:'animeStatusFilter',cardGridId:'animeCardGrid',selectAllCheckboxId:'selectAllAnimeCard'},series:{...PROJECT_BASE_CONFIG,type:'series',nameLabel:'اسم المسلسل',modalTitleAdd:'إضافة مسلسل جديد',modalTitleEdit:'تعديل بيانات المسلسل',fieldsContainerId:'tvdbFieldsContainer',altFieldsContainerId:'malFieldsContainer',fetchDataFnName:'fetchExternalData',fetchButtonId:'fetchTmdbDataBtn',fetchLoaderId:'tmdbFetchLoader',externalApiFields:['projectSeriesNameSearch','projectTmdbUrl','projectSeriesYear','projectSeriesNetwork','projectSeriesStatusTMDB','projectSeriesOverview','projectSeriesGenres','projectSeriesVoteAverage','projectSeriesPosterUrl','projectSeriesOriginCountry','projectSeriesOriginalLanguage','projectSeriesEpisodeRunTime'],dataProperties:{seriesNameSearch:'projectSeriesNameSearch',url:'projectTmdbUrl',seriesYear:'projectSeriesYear',seriesNetwork:'projectSeriesNetwork',seriesStatusTMDB:'projectSeriesStatusTMDB',seriesOverview:'projectSeriesOverview',seriesGenres:'projectSeriesGenres',seriesVoteAverage:'projectSeriesVoteAverage',seriesPosterUrl:'projectSeriesPosterUrl',seriesOriginCountry:'projectSeriesOriginCountry',seriesOriginalLanguage:'projectSeriesOriginalLanguage',seriesEpisodeRunTime:'projectSeriesEpisodeRunTime'},genreProperty:'seriesGenres',posterProperty:'seriesPosterUrl',yearProperty:'seriesYear',ratingProperty:'seriesVoteAverage',durationProperty:'projectSeriesEpisodeRunTime',externalLinkProperty:'url',externalLinkName:'TMDB',primaryLinkSelector:'.tmdb-link',secondaryLinkSelector:'.mal-link',statusFilterId:'seriesStatusFilter',cardGridId:'seriesCardGrid',selectAllCheckboxId:'selectAllSeriesCard'}};
 let unsavedChanges=false;
@@ -454,16 +454,16 @@ const debouncedGlobalSearch=debounce(handleGlobalSearch,300);
 const GAPI_CLIENT_ID = '365561915299-to68jo8cnvhvk6is9hgqu0si54n46nub.apps.googleusercontent.com';
 const GAPI_DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file';
-const REVIVE_SUBS_BACKUP_FOLDER_NAME = "ReviveSubsBackups";
+const REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME = "ReviveSubs_TeamBackups"; // اسم المجلد الذي ستنشئه وتشاركه
 const REVIVE_SUBS_BACKUP_FILENAME_PREFIX = "ReviveSubs_CloudBackup_";
 const MAX_CLOUD_BACKUPS = 3;
 
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-let reviveSubsFolderId = null;
+let targetDriveFolderId = null; 
 let pendingCloudAction = null;
-
+let isGapiClientAuthed = false;
 
 function gapiLoaded() {
     gapi.load('client', initializeGapiClient);
@@ -475,8 +475,8 @@ async function initializeGapiClient() {
             discoveryDocs: GAPI_DISCOVERY_DOCS,
         });
         gapiInited = true;
-        // console.log("GAPI client initialized.");
-        updateGoogleSignInButtonVisibility(); // Check initial state if GIS also loaded
+        console.log("GAPI client initialized.");
+        updateGoogleSignInButtonVisibility();
     } catch (error) {
         console.error("Error initializing GAPI client:", error);
         showAlert('فشل تهيئة Google API Client.', 'danger');
@@ -488,23 +488,30 @@ function gisLoaded() {
         tokenClient = google.accounts.oauth2.initTokenClient({
             client_id: GAPI_CLIENT_ID,
             scope: GAPI_SCOPES,
-            callback: async (tokenResponse) => { // Centralized callback
-                setCloudButtonLoadingState(false); // General reset for safety
+            callback: async (tokenResponse) => {
+                setCloudButtonLoadingState(false);
                 if (tokenResponse.error) {
-                    console.error('Error during Google authentication:', tokenResponse.error);
-                    showAlert('فشل مصادقة جوجل: ' + tokenResponse.error, 'danger');
+                    console.warn('Token response error:', tokenResponse.error);
+                    if (tokenResponse.error !== 'popup_closed_by_user' && tokenResponse.error !== 'access_denied') {
+                         showAlert('فشل مصادقة جوجل: ' + tokenResponse.error, 'danger');
+                    }
                     pendingCloudAction = null;
+                    isGapiClientAuthed = false;
+                    gapi.client.setToken(null);
                     updateGoogleSignInButtonVisibility();
                     return;
                 }
-                // console.log('GSI token response:', tokenResponse);
+                isGapiClientAuthed = true;
+                console.log('Google authentication successful.');
                 showAlert('تمت المصادقة مع جوجل بنجاح.', 'success');
                 updateGoogleSignInButtonVisibility();
                 
-                const folderOk = await findOrCreateReviveSubsFolder();
-                if (!folderOk && pendingCloudAction && pendingCloudAction !== findOrCreateReviveSubsFolder) {
+                const folderOk = await identifyTargetDriveFolder(pendingCloudAction === exportToCloud);
+
+                if (!folderOk && pendingCloudAction && pendingCloudAction !== identifyTargetDriveFolder) {
                      showAlert('فشل في الوصول لمجلد Google Drive. تم إلغاء العملية السحابية.', 'danger');
                      pendingCloudAction = null;
+                     targetDriveFolderId = null;
                      return;
                 }
 
@@ -520,8 +527,8 @@ function gisLoaded() {
             },
         });
         gisInited = true;
-        // console.log("GIS client initialized.");
-        updateGoogleSignInButtonVisibility(); // Check initial state if GAPI also loaded
+        console.log("GIS client initialized.");
+        updateGoogleSignInButtonVisibility();
     } catch (error) {
         console.error("Error initializing GIS client:", error);
         showAlert('فشل تهيئة Google Identity Services.', 'danger');
@@ -529,13 +536,16 @@ function gisLoaded() {
 }
 
 function updateGoogleSignInButtonVisibility() {
-    if (gapiInited && gisInited) { // Ensure both are ready
-        const isSignedIn = gapi.client.getToken() !== null;
-        toggleVisibility('googleSignInBtn', !isSignedIn);
-        toggleVisibility('googleSignOutBtn', isSignedIn);
+    if (gapiInited && gisInited) {
+        const token = gapi.client.getToken();
+        isGapiClientAuthed = (token !== null && token.access_token);
+
+        toggleVisibility('googleSignInBtn', !isGapiClientAuthed);
+        toggleVisibility('googleSignOutBtn', isGapiClientAuthed);
+        
+        // console.log("Updated Google Sign-In Button Visibility. Signed In: ", isGapiClientAuthed);
     } else {
-        // Default state if APIs not fully loaded yet
-        toggleVisibility('googleSignInBtn', true); // Assume not signed in
+        toggleVisibility('googleSignInBtn', true);
         toggleVisibility('googleSignOutBtn', false);
     }
 }
@@ -545,12 +555,87 @@ function handleSignOutClick() {
     if (token !== null) {
         google.accounts.oauth2.revoke(token.access_token, () => {
             gapi.client.setToken(null);
-            reviveSubsFolderId = null; 
+            targetDriveFolderId = null;
+            isGapiClientAuthed = false; 
             showAlert('تم تسجيل الخروج من جوجل.', 'info');
             updateGoogleSignInButtonVisibility();
         });
+    } else { 
+        isGapiClientAuthed = false;
+        updateGoogleSignInButtonVisibility();
     }
 }
+
+async function identifyTargetDriveFolder(isExporter = false) {
+    if (targetDriveFolderId && !isExporter) return targetDriveFolderId; // إذا كنا نستورد والمجلد معروف، استخدمه
+    if (targetDriveFolderId && isExporter) { // إذا كنا نصدر والمجلد معروف، تأكد أننا لا نزال نستطيع الكتابة
+        try {
+             const folderData = await gapi.client.drive.files.get({
+                fileId: targetDriveFolderId,
+                fields: 'id, capabilities'
+            });
+            if (folderData.result.capabilities.canAddChildren) {
+                return targetDriveFolderId;
+            } else {
+                 showAlert(`ليس لديك إذن لإضافة ملفات إلى المجلد المحدد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}".`, 'danger');
+                 targetDriveFolderId = null; // Reset as we can't use it
+                 return null;
+            }
+        } catch (e) { // Folder might have been deleted or permissions changed
+            console.warn("Error re-validating folder, will try to find/create again:", e);
+            targetDriveFolderId = null; // Reset to force re-search/create
+        }
+    }
+
+
+    if (gapi.client.getToken() === null) {
+        return null;
+    }
+
+    try {
+        const response = await gapi.client.drive.files.list({
+            q: `mimeType='application/vnd.google-apps.folder' and name='${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}' and trashed=false`,
+            fields: 'files(id, name, capabilities)',
+            spaces: 'drive'
+        });
+
+        if (response.result.files && response.result.files.length > 0) {
+            const folder = response.result.files[0];
+            if (isExporter && !folder.capabilities.canAddChildren) {
+                showAlert(`تم العثور على المجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" ولكن ليس لديك إذن لإضافة ملفات إليه.`, 'danger');
+                targetDriveFolderId = null;
+                return null;
+            }
+            targetDriveFolderId = folder.id;
+            // console.log(`Target folder "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" identified with ID: ${targetDriveFolderId}`);
+            return targetDriveFolderId;
+        } else if (isExporter) {
+            // console.log(`Folder "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" not found. Creating it as exporter.`);
+            const fileMetadata = {
+                'name': REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME,
+                'mimeType': 'application/vnd.google-apps.folder'
+            };
+            const createResponse = await gapi.client.drive.files.create({
+                resource: fileMetadata,
+                fields: 'id'
+            });
+            targetDriveFolderId = createResponse.result.id;
+            showAlert(`تم إنشاء مجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" في Google Drive الخاص بك. يرجى مشاركته مع رئيسك.`, 'info', 7000);
+            // console.log(`Folder "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" created with ID: ${targetDriveFolderId}`);
+            return targetDriveFolderId;
+        } else {
+            showAlert(`لم يتم العثور على مجلد باسم "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}". تأكد من أنه تمت مشاركته معك بالاسم الصحيح.`, 'warning');
+            targetDriveFolderId = null;
+            return null;
+        }
+    } catch (err) {
+        console.error("Error identifying target Drive folder:", err);
+        showAlert('خطأ في تحديد مجلد Google Drive: ' + (err.result?.error?.message || err.message), 'danger');
+        targetDriveFolderId = null;
+        return null;
+    }
+}
+
 
 async function checkAndPerformCloudAction(actionFunction, cloudActionType = 'export') {
     if (!gapiInited || !gisInited) {
@@ -559,84 +644,48 @@ async function checkAndPerformCloudAction(actionFunction, cloudActionType = 'exp
     }
     setCloudButtonLoadingState(true, cloudActionType);
 
-    if (gapi.client.getToken() === null) {
+    const token = gapi.client.getToken();
+    isGapiClientAuthed = (token !== null && token.access_token);
+
+    if (!isGapiClientAuthed) {
+        // console.log("No valid token found, requesting access token for cloud action.");
         pendingCloudAction = actionFunction;
-        tokenClient.requestAccessToken({ prompt: 'consent' }); // Callback will handle the rest
-        // Loading state will be reset by the callback or the action itself
+        tokenClient.requestAccessToken({}); // Default behavior, GSI handles popups if needed
     } else {
-        // Token exists, try to perform the action
-        const folderReady = await findOrCreateReviveSubsFolder();
+        // console.log("Valid token found, proceeding with cloud action.");
+        const folderReady = await identifyTargetDriveFolder(cloudActionType === 'export');
         if (folderReady) {
              try {
                 await actionFunction();
             } catch (err) {
-                console.error("Cloud action error:", err);
-                if (err.status === 401 || err.result?.error?.code === 401) { // Unauthorized
-                    showAlert('انتهت صلاحية الجلسة أو الرمز غير صالح. يرجى تسجيل الدخول مرة أخرى.', 'warning');
-                    gapi.client.setToken(null); // Clear bad token
+                console.error("Cloud action error with existing token:", err);
+                if (err.status === 401 || (err.result && err.result.error && err.result.error.code === 401) ) {
+                    showAlert('انتهت صلاحية الجلسة أو الرمز غير صالح. يرجى محاولة تسجيل الدخول مرة أخرى.', 'warning');
+                    gapi.client.setToken(null);
+                    isGapiClientAuthed = false;
                     updateGoogleSignInButtonVisibility();
-                    pendingCloudAction = actionFunction; // Store for re-attempt
-                    tokenClient.requestAccessToken({ prompt: 'consent' });
-                     // Don't reset loading state here, callback will handle
+                    targetDriveFolderId = null;
+                    pendingCloudAction = actionFunction;
+                    tokenClient.requestAccessToken({});
                 } else {
                     showAlert('خطأ أثناء تنفيذ العملية السحابية: ' + (err.result?.error?.message || err.message || 'خطأ غير معروف'), 'danger');
                     setCloudButtonLoadingState(false, cloudActionType);
                 }
             }
-        } else if (reviveSubsFolderId === null && actionFunction !== findOrCreateReviveSubsFolder) {
-            showAlert('تعذر الوصول إلى مجلد Google Drive. يرجى محاولة تسجيل الدخول مرة أخرى أو التحقق من الأذونات.', 'danger');
-            setCloudButtonLoadingState(false, cloudActionType);
-        }
-        // If actionFunction is findOrCreateReviveSubsFolder itself, it handles its own errors.
-    }
-}
-
-
-async function findOrCreateReviveSubsFolder() {
-    if (reviveSubsFolderId) return reviveSubsFolderId;
-    // No gapi.client.getToken() check here, as this might be called during auth flow.
-    // The caller (checkAndPerformCloudAction) ensures token or initiates auth.
-    if(gapi.client.getToken() === null) {
-        // console.warn("findOrCreateReviveSubsFolder called without auth token.");
-        return null; // Cannot proceed without a token
-    }
-
-    try {
-        const response = await gapi.client.drive.files.list({
-            q: `mimeType='application/vnd.google-apps.folder' and name='${REVIVE_SUBS_BACKUP_FOLDER_NAME}' and trashed=false`,
-            fields: 'files(id, name)',
-            spaces: 'drive'
-        });
-        if (response.result.files && response.result.files.length > 0) {
-            reviveSubsFolderId = response.result.files[0].id;
-            return reviveSubsFolderId;
         } else {
-            const fileMetadata = {
-                'name': REVIVE_SUBS_BACKUP_FOLDER_NAME,
-                'mimeType': 'application/vnd.google-apps.folder'
-            };
-            const createResponse = await gapi.client.drive.files.create({
-                resource: fileMetadata,
-                fields: 'id'
-            });
-            reviveSubsFolderId = createResponse.result.id;
-            return reviveSubsFolderId;
+            setCloudButtonLoadingState(false, cloudActionType); // Folder not ready, error shown by identifyTargetDriveFolder
         }
-    } catch (err) {
-        console.error("Error finding/creating Drive folder:", err);
-        showAlert('خطأ في الوصول لمجلد Google Drive: ' + (err.result?.error?.message || err.message), 'danger');
-        reviveSubsFolderId = null; // Ensure it's reset on error
-        return null;
     }
 }
 
-async function listDriveFiles(folderId) {
+
+async function listDriveFiles(folderIdToQuery) { // Renamed parameter for clarity
     try {
         const response = await gapi.client.drive.files.list({
-            q: `'${folderId}' in parents and name contains '${REVIVE_SUBS_BACKUP_FILENAME_PREFIX}' and trashed=false`,
+            q: `'${folderIdToQuery}' in parents and name contains '${REVIVE_SUBS_BACKUP_FILENAME_PREFIX}' and trashed=false`,
             fields: 'files(id, name, createdTime)',
-            orderBy: 'createdTime desc', // Get newest first for easier management later
-            pageSize: 10 // More than enough for 3 backups
+            orderBy: 'createdTime desc',
+            pageSize: 10
         });
         return response.result.files || [];
     } catch (err) {
@@ -651,7 +700,6 @@ async function deleteDriveFile(fileId) {
         await gapi.client.drive.files.delete({
             fileId: fileId
         });
-        // console.log('File deleted:', fileId);
         return true;
     } catch (err) {
         console.error("Error deleting Drive file:", err);
@@ -671,7 +719,7 @@ function generateCloudBackupFilename() {
     return `${REVIVE_SUBS_BACKUP_FILENAME_PREFIX}${year}${month}${day}_${hours}${minutes}${seconds}.json`;
 }
 
-async function uploadToDrive(folderId, fileName, content) {
+async function uploadToDrive(folderIdToUploadIn, fileName, content) { // Renamed parameter
     const boundary = '-------314159265358979323846';
     const delimiter = "\r\n--" + boundary + "\r\n";
     const close_delim = "\r\n--" + boundary + "--";
@@ -679,7 +727,7 @@ async function uploadToDrive(folderId, fileName, content) {
     const metadata = {
         'name': fileName,
         'mimeType': 'application/json',
-        'parents': [folderId]
+        'parents': [folderIdToUploadIn]
     };
 
     const multipartRequestBody =
@@ -701,7 +749,6 @@ async function uploadToDrive(folderId, fileName, content) {
             },
             'body': multipartRequestBody
         });
-        // console.log("File uploaded successfully:", response.result);
         return response.result;
     } catch (err) {
         console.error("Error uploading to Drive:", err);
@@ -711,35 +758,29 @@ async function uploadToDrive(folderId, fileName, content) {
 }
 
 async function exportToCloud() {
-    if (!reviveSubsFolderId) {
-        showAlert('لم يتم تحديد مجلد Google Drive. حاول مرة أخرى.', 'warning');
+    if (!targetDriveFolderId) { // Relies on targetDriveFolderId being set correctly by identifyTarget...
+        showAlert('لم يتم تحديد مجلد Google Drive للتصدير. حاول مرة أخرى.', 'warning');
         setCloudButtonLoadingState(false, 'export');
         return;
     }
     try {
-        const existingFiles = await listDriveFiles(reviveSubsFolderId);
-        // Files are already sorted by createdTime desc by listDriveFiles
+        const existingFiles = await listDriveFiles(targetDriveFolderId);
         if (existingFiles.length >= MAX_CLOUD_BACKUPS) {
-            // Delete the oldest ones if we have MAX_CLOUD_BACKUPS or more.
-            // existingFiles are sorted newest to oldest, so iterate from the end.
             const filesToDelete = existingFiles.slice(MAX_CLOUD_BACKUPS -1);
             for (const oldFile of filesToDelete) {
-                // console.log(`Max backups reached. Deleting oldest: ${oldFile.name} (ID: ${oldFile.id})`);
                 await deleteDriveFile(oldFile.id);
             }
         }
 
         const fileName = generateCloudBackupFilename();
         const fileContent = JSON.stringify(data, null, 2);
-        const uploadResult = await uploadToDrive(reviveSubsFolderId, fileName, fileContent);
+        const uploadResult = await uploadToDrive(targetDriveFolderId, fileName, fileContent);
 
         if (uploadResult) {
-            showAlert(`تم تصدير البيانات إلى Google Drive بنجاح كـ ${fileName}`, 'success');
-            logRecentActivity(`تصدير البيانات إلى Google Drive: ${fileName}`);
+            showAlert(`تم تصدير البيانات إلى مجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" في Google Drive بنجاح كـ ${fileName}`, 'success');
+            logRecentActivity(`تصدير البيانات إلى Google Drive (مجلد الفريق): ${fileName}`);
         }
     } catch (error) {
-        // Errors from listDriveFiles, deleteDriveFile, uploadToDrive are caught by checkAndPerformCloudAction
-        // or handled by individual functions already. This is a fallback.
         console.error("Error in exportToCloud process:", error);
         showAlert('حدث خطأ غير متوقع أثناء التصدير السحابي.', 'danger');
     } finally {
@@ -753,7 +794,7 @@ async function downloadDriveFileContent(fileId) {
             fileId: fileId,
             alt: 'media'
         });
-        return response.body; // This is a string
+        return response.body;
     } catch (err) {
         console.error("Error downloading file content from Drive:", err);
         showAlert('خطأ في تحميل محتوى الملف من Google Drive: ' + (err.result?.error?.message || err.message), 'danger');
@@ -762,8 +803,8 @@ async function downloadDriveFileContent(fileId) {
 }
 
 async function importFromCloud() {
-    if (!reviveSubsFolderId) {
-        showAlert('لم يتم تحديد مجلد Google Drive. حاول مرة أخرى.', 'warning');
+    if (!targetDriveFolderId) { // Relies on targetDriveFolderId being set correctly
+        showAlert('لم يتم تحديد مجلد Google Drive للاستيراد. تأكد من أنه تمت مشاركته معك بالاسم الصحيح.', 'warning');
         setCloudButtonLoadingState(false, 'import');
         return;
     }
@@ -773,12 +814,12 @@ async function importFromCloud() {
     setStyle('cloudImportModal', 'display', 'block');
 
     try {
-        const files = await listDriveFiles(reviveSubsFolderId);
+        const files = await listDriveFiles(targetDriveFolderId);
         const filesListEl = getEl('cloudBackupFilesList');
-        filesListEl.innerHTML = ''; // Clear loading/previous
+        filesListEl.innerHTML = '';
 
         if (files.length === 0) {
-            filesListEl.innerHTML = '<li class="text-center text-muted">لا توجد نسخ احتياطية في Google Drive.</li>';
+            filesListEl.innerHTML = `<li class="text-center text-muted">لا توجد نسخ احتياطية في مجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}".</li>`;
             return;
         }
 
@@ -795,7 +836,7 @@ async function importFromCloud() {
                     return;
                 }
                 closeModal('cloudImportModal');
-                setCloudButtonLoadingState(true, 'import'); // Show loading on the original button too
+                setCloudButtonLoadingState(true, 'import');
 
                 const fileContent = await downloadDriveFileContent(file.id);
                 if (fileContent) {
@@ -805,12 +846,12 @@ async function importFromCloud() {
                         if (imported && imported.settings && Array.isArray(imported.members) && Array.isArray(imported.anime) && Array.isArray(imported.series)) {
                             data = { ...defaultStructure, ...imported };
                             data.settings = { ...defaultStructure.settings, ...(imported.settings || {}) };
-                            data.members.forEach(m => { }); // Basic validation placeholder
+                            data.members.forEach(m => { });
                             if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
                             
                             await saveData();
                             unsavedChanges = false;
-                            logRecentActivity(`استيراد من Google Drive: ${file.name}`);
+                            logRecentActivity(`استيراد من Google Drive (مجلد الفريق): ${file.name}`);
                             showAlert('تم استيراد البيانات من Google Drive بنجاح.', 'success');
                             updateAllDisplays();
                         } else {
@@ -827,40 +868,37 @@ async function importFromCloud() {
         });
 
     } catch (error) {
-        // Errors handled by listDriveFiles or checkAndPerformCloudAction
         getEl('cloudBackupFilesList').innerHTML = '<li class="text-center text-danger">خطأ في جلب قائمة الملفات.</li>';
     } finally {
         toggleVisibility('cloudImportSpinner', false);
-        // Do not reset main import button loading state here, only after selection or cancellation
     }
 }
 
 function setCloudButtonLoadingState(isLoading, type = 'both') { 
-    const importBtn = getEl('importCloudBtn');
-    const exportBtn = getEl('exportCloudBtn');
+    const importBtnLink = getEl('importCloudBtn'); // The <a> tag
+    const exportBtnLink = getEl('exportCloudBtn'); // The <a> tag
     const loadingSpinner = ' <i class="fas fa-spinner fa-spin"></i>';
 
     if (type === 'import' || type === 'both') {
-        if (importBtn) importBtn.innerHTML = isLoading ? 'جاري...' + loadingSpinner : 'استيراد سحابي (Drive)';
+        if (importBtnLink) importBtnLink.innerHTML = isLoading ? 'جاري الاستيراد...' + loadingSpinner : 'استيراد سحابي (Drive)';
     }
     if (type === 'export' || type === 'both') {
-        if (exportBtn) exportBtn.innerHTML = isLoading ? 'جاري...' + loadingSpinner : 'تصدير سحابي (Drive)';
+        if (exportBtnLink) exportBtnLink.innerHTML = isLoading ? 'جاري التصدير...' + loadingSpinner : 'تصدير سحابي (Drive)';
     }
 }
-
 
 function openDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,DB_VERSION);request.onupgradeneeded=(event)=>{const db=event.target.result;if(!db.objectStoreNames.contains(STORE_NAME))db.createObjectStore(STORE_NAME);};request.onsuccess=(event)=>resolve(event.target.result);request.onerror=(event)=>{console.error("IndexedDB error:",event.target.errorCode);reject(event.target.errorCode);};});}
 async function loadData(){try{const db=await openDB();const transaction=db.transaction(STORE_NAME,"readonly");const store=transaction.objectStore(STORE_NAME);const request=store.get(MAIN_DATA_KEY);return new Promise((resolve,reject)=>{request.onsuccess=async(event)=>{const savedData=event.target.result;const defaultStructure=initializeDefaultDataStructure(false);if(savedData){if(savedData.version!==data.version)console.warn(`Data version mismatch. Current: ${data.version}, Saved: ${savedData.version}. Attempting to merge.`);data={...defaultStructure,...savedData};data.settings={...defaultStructure.settings,...(savedData.settings||{})};data.members=(savedData.members||[]);data.anime=savedData.anime||[];data.series=savedData.series||[];data.recentActivityLog=savedData.recentActivityLog||[];}else{data=defaultStructure;await saveData();}
 updateHeaderDisplay();updateHeaderSocialLinks();unsavedChanges=false;resolve();};request.onerror=(event)=>{console.error('Error loading data from IndexedDB:',event.target.errorCode);requestAnimationFrame(()=>showAlert('خطأ في تحميل البيانات. سيتم استخدام البيانات الافتراضية.','danger'));data=initializeDefaultDataStructure(false);resolve();};});}catch(error){console.error("Failed to open DB for loading:",error);requestAnimationFrame(()=>showAlert('فشل فتح قاعدة البيانات. سيتم استخدام البيانات الافتراضية.','danger'));data=initializeDefaultDataStructure(false);return Promise.resolve();}}
 function initializeDefaultDataStructure(setGlobal=true){const defaultStructure={version:"2.9.8",lastSaved:new Date().toISOString(),settings:{headerLogoUrl:"",headerLinkWebsiteUrl:"#",headerLinkDiscordUrl:"#",headerLinkTelegramUrl:"#",headerLinkDriveUrl:"#"},members:[],anime:[],series:[],recentActivityLog:[]};if(setGlobal)data=JSON.parse(JSON.stringify(defaultStructure));return defaultStructure;}
-async function saveData(){try{const db=await openDB();const transaction=db.transaction(STORE_NAME,"readwrite");const store=transaction.objectStore(STORE_NAME);data.lastSaved=new Date().toISOString();const request=store.put(data,MAIN_DATA_KEY);return new Promise((resolve,reject)=>{request.onsuccess=()=>{unsavedChanges=false;console.log('Data saved to IndexedDB successfully.');resolve(true);};request.onerror=(event)=>{console.error('Error saving data to IndexedDB:',event.target.errorCode);requestAnimationFrame(()=>showAlert('خطأ أثناء حفظ البيانات في IndexedDB!','danger'));reject(false);};});}catch(error){console.error("Failed to open DB for saving:",error);requestAnimationFrame(()=>showAlert('فشل فتح قاعدة البيانات للحفظ!','danger'));return Promise.resolve(false);}}
+async function saveData(){try{const db=await openDB();const transaction=db.transaction(STORE_NAME,"readwrite");const store=transaction.objectStore(STORE_NAME);data.lastSaved=new Date().toISOString();const request=store.put(data,MAIN_DATA_KEY);return new Promise((resolve,reject)=>{request.onsuccess=()=>{unsavedChanges=false;/*console.log('Data saved to IndexedDB successfully.');*/resolve(true);};request.onerror=(event)=>{console.error('Error saving data to IndexedDB:',event.target.errorCode);requestAnimationFrame(()=>showAlert('خطأ أثناء حفظ البيانات في IndexedDB!','danger'));reject(false);};});}catch(error){console.error("Failed to open DB for saving:",error);requestAnimationFrame(()=>showAlert('فشل فتح قاعدة البيانات للحفظ!','danger'));return Promise.resolve(false);}}
 async function manualSaveData(){if(await saveData()){requestAnimationFrame(()=>showAlert('تم حفظ البيانات يدوياً بنجاح!','success'));logRecentActivity(`تم حفظ جميع البيانات يدوياً.`);}else{unsavedChanges=true;}}
+
 document.addEventListener('DOMContentLoaded',async function(){
-    initializeApp();
+    initializeApp(); // initializeApp now contains the GAPI/GIS ready checks
     getEl('globalSearchToggleBtn').addEventListener('click',()=>{getEl('globalSearchInput').classList.toggle('hidden');if(!getEl('globalSearchInput').classList.contains('hidden')){getEl('globalSearchInput').focus();}});
     getEl('globalSaveBtn').addEventListener('click',manualSaveData);
 
-    // Dropdown logic
     getEl('globalImportToggleBtn').addEventListener('click', (event) => {
         event.stopPropagation();
         toggleDropdown('globalImportDropdown');
@@ -878,7 +916,6 @@ document.addEventListener('DOMContentLoaded',async function(){
         }
     });
 
-    // Dropdown item actions
     getEl('importLocalBtn').addEventListener('click', (e) => { e.preventDefault(); importData(); closeAllDropdowns(); });
     getEl('exportLocalBtn').addEventListener('click', (e) => { e.preventDefault(); exportAllData(); closeAllDropdowns(); });
     
@@ -897,8 +934,8 @@ document.addEventListener('DOMContentLoaded',async function(){
         if (!gisInited || !gapiInited) {
             showAlert('Google API ليست جاهزة. يرجى الانتظار.', 'warning'); return;
         }
-        pendingCloudAction = null; // No specific action, just sign-in
-        tokenClient.requestAccessToken({prompt: 'consent'});
+        pendingCloudAction = null;
+        tokenClient.requestAccessToken({}); // No prompt, GSI decides
     });
     getEl('googleSignOutBtn').addEventListener('click', handleSignOutClick);
 });
@@ -929,7 +966,7 @@ async function initializeApp(){
     const seriesStatusFilterEl=getEl(PROJECT_CONFIG.series.statusFilterId);
     if(seriesStatusFilterEl)seriesStatusFilterEl.value='جارٍ';
     
-    updateAllDisplays(); // Call again after filter set
+    updateAllDisplays();
     populateMemberReportDropdown();
 
     window.addEventListener('beforeunload',(e)=>{
@@ -944,12 +981,11 @@ async function initializeApp(){
     showProjectSubView('animeProjectsView',document.querySelector('.sub-nav-tab[onclick*="animeProjectsView"]'));
     ['members','anime','series'].forEach(type=>updateDeleteButtonText(type));
 
-    // Initial Google Sign-In button visibility check
-    // It might take a moment for GAPI/GIS to load and initialize
     setTimeout(() => {
         updateGoogleSignInButtonVisibility();
-    }, 1000); // Delay to allow GAPI/GIS scripts to load and initialize
+    }, 1500); 
 }
+
 function updateAllDisplays(){updateDashboard();sortAndLoadData('members',currentSort.members);const activeProjectSubViewButton=document.querySelector('#projects .sub-nav-tab.active');if(activeProjectSubViewButton){if(activeProjectSubViewButton.textContent.includes("الأنميات"))sortAndLoadData('anime',currentSort.anime);else if(activeProjectSubViewButton.textContent.includes("المسلسلات"))sortAndLoadData('series',currentSort.series);else if(activeProjectSubViewButton.textContent.includes("الأرشيف"))loadArchivedProjects(getVal('archiveTypeFilter'));}else sortAndLoadData('anime',currentSort.anime);loadSettings();updateRecentActivityDisplay();}
 function showTab(event,tabName){requestAnimationFrame(()=>{document.querySelectorAll('.nav-tab').forEach(tab=>tab.classList.remove('active'));const targetButton=event?.currentTarget||Array.from(document.querySelectorAll('.nav-tab')).find(btn=>btn.onclick&&btn.onclick.toString().includes(`'${tabName}'`));if(targetButton)targetButton.classList.add('active');document.querySelectorAll('.tab-pane').forEach(pane=>pane.classList.remove('active'));const currentTabPane=getEl(tabName);if(currentTabPane)currentTabPane.classList.add('active');const actions={'dashboard':updateDashboard,'members':()=>sortAndLoadData('members',currentSort.members),'projects':()=>{const activeSubNav=document.querySelector('#projects .sub-nav-tab.active');if(activeSubNav)activeSubNav.click();else showProjectSubView('animeProjectsView',document.querySelector('#projects .sub-nav-tab[onclick*="animeProjectsView"]'));},'settings':loadSettings};if(actions[tabName])actions[tabName]();if(tabName==='dashboard')updateRecentActivityDisplay();});}
 function navigateToMembersTab(){showTab(null,'members');}
