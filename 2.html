@@ -240,12 +240,21 @@
 <div id="reportContent" class="mt-20 card"><p class="text-center text-muted">اختر نوع التقرير لعرضه.</p></div>
 </section>
 <section class="settings-section">
-<h3 class="section-title">تعيين الروابط</h3>
+<h3 class="section-title">تعيين الروابط وإعدادات Drive</h3>
 <div class="form-group"><label for="headerLogoUrl">رابط صورة الهيدر (للخلفية الكاملة، اختياري)</label><input type="url" class="form-control" id="headerLogoUrl" placeholder="https://example.com/logo.png" onchange="updateSettings()"></div>
 <div class="form-group"><label for="headerLinkWebsiteUrl">رابط الموقع الرسمي</label><input type="url" class="form-control" id="headerLinkWebsiteUrl" placeholder="https://example.com" onchange="updateSettings()"></div>
 <div class="form-group"><label for="headerLinkDiscordUrl">رابط ديسكورد</label><input type="url" class="form-control" id="headerLinkDiscordUrl" placeholder="https://discord.gg/xxxx" onchange="updateSettings()"></div>
 <div class="form-group"><label for="headerLinkTelegramUrl">رابط تيليجرام</label><input type="url" class="form-control" id="headerLinkTelegramUrl" placeholder="https://t.me/xxxx" onchange="updateSettings()"></div>
-<div class="form-group"><label for="headerLinkDriveUrl">رابط جوجل درايف</label><input type="url" class="form-control" id="headerLinkDriveUrl" placeholder="https://drive.google.com/xxxx" onchange="updateSettings()"></div>
+<div class="form-group"><label for="headerLinkDriveUrl">رابط جوجل درايف (عام للفريق)</label><input type="url" class="form-control" id="headerLinkDriveUrl" placeholder="https://drive.google.com/xxxx" onchange="updateSettings()"></div>
+<div class="form-group">
+    <label for="sharedDriveFolderId">معرف مجلد Google Drive المشترك (للمزامنة السحابية)</label>
+    <input type="text" class="form-control" id="sharedDriveFolderId" placeholder="مثال: 1C-cAVTC05JBEefmGM8M0smxzFzWgVMpK" onchange="updateSettings()">
+    <small class="text-muted" style="font-size: 0.8em; display: block; margin-top: 5px;">
+        يجب الحصول على هذا المعرف من مدير الفريق إذا لم تقم أنت بإنشاء المجلد. 
+        إذا كنت تقوم بالإعداد الأولي كمدير، اتركه فارغاً لمحاولة إنشاء المجلد بالاسم الافتراضي (`ReviveSubs_TeamBackups`) وحفظ المعرف هنا تلقائياً، ثم قم بمشاركة هذا المجلد والمعرف مع فريقك.
+    </small>
+</div>
+
 </section>
 </section>
 </div>
@@ -436,7 +445,7 @@ function setStyle(id,property,value){const el=getEl(id);if(el)el.style[property]
 function addClass(id,className){const el=getEl(id);if(el)el.classList.add(className);}
 function removeClass(id,className){const el=getEl(id);if(el)el.classList.remove(className);}
 const DB_NAME="ReviveSubsDB",STORE_NAME="appDataStore",DB_VERSION=1,MAIN_DATA_KEY="mainApplicationData";
-let data={version:"2.9.8"};
+let data={version:"2.9.8"}; // Will be populated by initializeDefaultDataStructure or loadData
 const PROJECT_BASE_CONFIG={formFields:['projectStatus','totalEpisodes','completedEpisodesProject','projectTranslator','projectEditor','projectTimer','projectSubtitler','translationPrice','editingPrice','timerPrice','subtitlerPrice','translationBonus','editingBonus','timerBonus','subtitlerBonus','rawUrl','projectNotes'],numberFields:['totalEpisodes','completedEpisodesProject','translationPrice','editingPrice','timerPrice','subtitlerPrice','translationBonus','editingBonus','timerBonus','subtitlerBonus'],selectFields:['projectStatus','projectTranslator','projectEditor','projectTimer','projectSubtitler']};
 const PROJECT_CONFIG={anime:{...PROJECT_BASE_CONFIG,type:'anime',nameLabel:'اسم الأنمي',modalTitleAdd:'إضافة أنمي جديد',modalTitleEdit:'تعديل بيانات الأنمي',fieldsContainerId:'malFieldsContainer',altFieldsContainerId:'tvdbFieldsContainer',fetchDataFnName:'fetchExternalData',fetchButtonId:'fetchMalDataBtn',fetchLoaderId:'malFetchLoader',externalApiFields:['projectMalId','projectUrl','projectImageUrl','projectAnimeType','projectStudio','projectSource','projectPremiered','projectGenres','projectThemes','projectDuration','projectRating','projectScore'],dataProperties:{malId:'projectMalId',url:'projectUrl',imageUrl:'projectImageUrl',animeType:'projectAnimeType',studio:'projectStudio',source:'projectSource',premiered:'projectPremiered',genres:'projectGenres',themes:'projectThemes',duration:'projectDuration',rating:'projectRating',score:'projectScore'},genreProperty:'genres',posterProperty:'imageUrl',yearProperty:'premiered',ratingProperty:'score',durationProperty:'duration',externalLinkProperty:'url',externalLinkName:'MAL',primaryLinkSelector:'.mal-link',secondaryLinkSelector:'.tmdb-link',statusFilterId:'animeStatusFilter',cardGridId:'animeCardGrid',selectAllCheckboxId:'selectAllAnimeCard'},series:{...PROJECT_BASE_CONFIG,type:'series',nameLabel:'اسم المسلسل',modalTitleAdd:'إضافة مسلسل جديد',modalTitleEdit:'تعديل بيانات المسلسل',fieldsContainerId:'tvdbFieldsContainer',altFieldsContainerId:'malFieldsContainer',fetchDataFnName:'fetchExternalData',fetchButtonId:'fetchTmdbDataBtn',fetchLoaderId:'tmdbFetchLoader',externalApiFields:['projectSeriesNameSearch','projectTmdbUrl','projectSeriesYear','projectSeriesNetwork','projectSeriesStatusTMDB','projectSeriesOverview','projectSeriesGenres','projectSeriesVoteAverage','projectSeriesPosterUrl','projectSeriesOriginCountry','projectSeriesOriginalLanguage','projectSeriesEpisodeRunTime'],dataProperties:{seriesNameSearch:'projectSeriesNameSearch',url:'projectTmdbUrl',seriesYear:'projectSeriesYear',seriesNetwork:'projectSeriesNetwork',seriesStatusTMDB:'projectSeriesStatusTMDB',seriesOverview:'projectSeriesOverview',seriesGenres:'projectSeriesGenres',seriesVoteAverage:'projectSeriesVoteAverage',seriesPosterUrl:'projectSeriesPosterUrl',seriesOriginCountry:'projectSeriesOriginCountry',seriesOriginalLanguage:'projectSeriesOriginalLanguage',seriesEpisodeRunTime:'projectSeriesEpisodeRunTime'},genreProperty:'seriesGenres',posterProperty:'seriesPosterUrl',yearProperty:'seriesYear',ratingProperty:'seriesVoteAverage',durationProperty:'projectSeriesEpisodeRunTime',externalLinkProperty:'url',externalLinkName:'TMDB',primaryLinkSelector:'.tmdb-link',secondaryLinkSelector:'.mal-link',statusFilterId:'seriesStatusFilter',cardGridId:'seriesCardGrid',selectAllCheckboxId:'selectAllSeriesCard'}};
 let unsavedChanges=false;
@@ -454,14 +463,14 @@ const debouncedGlobalSearch=debounce(handleGlobalSearch,300);
 const GAPI_CLIENT_ID = '365561915299-to68jo8cnvhvk6is9hgqu0si54n46nub.apps.googleusercontent.com';
 const GAPI_DISCOVERY_DOCS = ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest"];
 const GAPI_SCOPES = 'https://www.googleapis.com/auth/drive.file';
-const REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME = "ReviveSubs_TeamBackups"; // اسم المجلد الذي ستنشئه وتشاركه
+const REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME = "ReviveSubs_TeamBackups"; // Name for initial creation by admin
 const REVIVE_SUBS_BACKUP_FILENAME_PREFIX = "ReviveSubs_CloudBackup_";
 const MAX_CLOUD_BACKUPS = 3;
 
 let tokenClient;
 let gapiInited = false;
 let gisInited = false;
-let targetDriveFolderId = null; 
+let targetDriveFolderId = null; // This will be cached for the session once identified
 let pendingCloudAction = null;
 let isGapiClientAuthed = false;
 
@@ -506,20 +515,15 @@ function gisLoaded() {
                 showAlert('تمت المصادقة مع جوجل بنجاح.', 'success');
                 updateGoogleSignInButtonVisibility();
                 
-                const folderOk = await identifyTargetDriveFolder(pendingCloudAction === exportToCloud);
-
-                if (!folderOk && pendingCloudAction && pendingCloudAction !== identifyTargetDriveFolder) {
-                     showAlert('فشل في الوصول لمجلد Google Drive. تم إلغاء العملية السحابية.', 'danger');
-                     pendingCloudAction = null;
-                     targetDriveFolderId = null;
-                     return;
-                }
-
+                // identifyTargetDriveFolder will be called by checkAndPerformCloudAction which calls the pending action
+                // No need to call it directly here, as it might be an export or import
                 if (pendingCloudAction && typeof pendingCloudAction === 'function') {
                     try {
-                        await pendingCloudAction();
+                        // The actual cloud function (e.g., exportToCloud, importFromCloud) will be wrapped
+                        // by checkAndPerformCloudAction, which itself calls identifyTargetDriveFolder.
+                        await checkAndPerformCloudAction(pendingCloudAction, pendingCloudAction === exportToCloud ? 'export' : 'import', true);
                     } catch (err) {
-                        console.error("Error executing pending cloud action:", err);
+                        console.error("Error executing pending cloud action after auth:", err);
                         showAlert('خطأ بعد المصادقة: ' + (err.result?.error?.message || err.message || 'خطأ غير معروف'), 'danger');
                     }
                 }
@@ -535,6 +539,7 @@ function gisLoaded() {
     }
 }
 
+
 function updateGoogleSignInButtonVisibility() {
     if (gapiInited && gisInited) {
         const token = gapi.client.getToken();
@@ -543,7 +548,6 @@ function updateGoogleSignInButtonVisibility() {
         toggleVisibility('googleSignInBtn', !isGapiClientAuthed);
         toggleVisibility('googleSignOutBtn', isGapiClientAuthed);
         
-        // console.log("Updated Google Sign-In Button Visibility. Signed In: ", isGapiClientAuthed);
     } else {
         toggleVisibility('googleSignInBtn', true);
         toggleVisibility('googleSignOutBtn', false);
@@ -555,7 +559,7 @@ function handleSignOutClick() {
     if (token !== null) {
         google.accounts.oauth2.revoke(token.access_token, () => {
             gapi.client.setToken(null);
-            targetDriveFolderId = null;
+            targetDriveFolderId = null; // Clear cached folder ID on sign out
             isGapiClientAuthed = false; 
             showAlert('تم تسجيل الخروج من جوجل.', 'info');
             updateGoogleSignInButtonVisibility();
@@ -567,49 +571,97 @@ function handleSignOutClick() {
 }
 
 async function identifyTargetDriveFolder(isExporter = false) {
-    if (targetDriveFolderId && !isExporter) return targetDriveFolderId; // إذا كنا نستورد والمجلد معروف، استخدمه
-    if (targetDriveFolderId && isExporter) { // إذا كنا نصدر والمجلد معروف، تأكد أننا لا نزال نستطيع الكتابة
+    // 1. Check if targetDriveFolderId is already cached (from a previous successful call in this session)
+    if (targetDriveFolderId) {
         try {
-             const folderData = await gapi.client.drive.files.get({
+            const folderData = await gapi.client.drive.files.get({
                 fileId: targetDriveFolderId,
-                fields: 'id, capabilities'
+                fields: 'id, name, capabilities, shared, ownedByMe'
             });
-            if (folderData.result.capabilities.canAddChildren) {
-                return targetDriveFolderId;
-            } else {
-                 showAlert(`ليس لديك إذن لإضافة ملفات إلى المجلد المحدد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}".`, 'danger');
-                 targetDriveFolderId = null; // Reset as we can't use it
+            // Check if still valid and has necessary permissions
+            const caps = folderData.result.capabilities;
+            if (isExporter && !caps.canAddChildren) {
+                showAlert(`لم يعد لديك إذن لإضافة ملفات إلى المجلد المستخدم سابقاً (ID: ${targetDriveFolderId}). يرجى التحقق من الإعدادات أو صلاحيات المجلد.`, 'danger', 7000);
+                targetDriveFolderId = null; // Invalidate cache
+                return null;
+            }
+            // For importer, canListChildren or canRead should be enough. If Drive API allows 'get' then it's likely readable.
+            // More specific check:
+            if (!isExporter && !caps.canListChildren && !caps.canRead) {
+                 showAlert(`لم يعد لديك إذن لعرض محتويات المجلد المستخدم سابقاً (ID: ${targetDriveFolderId}). يرجى التحقق من الإعدادات أو صلاحيات المجلد.`, 'danger', 7000);
+                 targetDriveFolderId = null;
                  return null;
             }
-        } catch (e) { // Folder might have been deleted or permissions changed
-            console.warn("Error re-validating folder, will try to find/create again:", e);
-            targetDriveFolderId = null; // Reset to force re-search/create
+            // console.log("Using cached and validated targetDriveFolderId:", targetDriveFolderId);
+            return targetDriveFolderId;
+        } catch (e) {
+            console.warn("Cached targetDriveFolderId is no longer valid:", e);
+            targetDriveFolderId = null; // Invalidate cache
+            // Continue to try and find/set it again
         }
     }
 
-
-    if (gapi.client.getToken() === null) {
-        return null;
+    // 2. Try to use sharedDriveFolderId from settings
+    const settingsFolderId = data.settings.sharedDriveFolderId;
+    if (settingsFolderId) {
+        try {
+            const response = await gapi.client.drive.files.get({
+                fileId: settingsFolderId,
+                fields: 'id, name, capabilities, shared, ownedByMe'
+            });
+            const folder = response.result;
+            const caps = folder.capabilities;
+            // Check permissions
+            if (isExporter && !caps.canAddChildren) {
+                showAlert(`تم توفير معرف مجلد (${settingsFolderId})، ولكن ليس لديك إذن لإضافة ملفات إليه. تأكد من أن المجلد الصحيح مشترك معك بصلاحيات تعديل.`, 'danger', 7000);
+                return null;
+            }
+             if (!isExporter && !caps.canListChildren && !caps.canRead) {
+                 showAlert(`تم توفير معرف مجلد (${settingsFolderId})، ولكن ليس لديك إذن لعرض محتوياته. تأكد من أن المجلد الصحيح مشترك معك بصلاحيات عرض على الأقل.`, 'danger', 7000);
+                 return null;
+            }
+            targetDriveFolderId = folder.id; // Cache it for this session
+            // console.log(`Using folder ID from settings: ${targetDriveFolderId} (Name: ${folder.name})`);
+            return targetDriveFolderId;
+        } catch (err) {
+            console.error(`Error accessing folder with ID "${settingsFolderId}" from settings:`, err);
+            showAlert(`فشل الوصول للمجلد بالمعرف "${settingsFolderId}" المحدد في الإعدادات. تأكد من صحة المعرف وأنه مشترك معك. الخطأ: ` + (err.result?.error?.message || err.message), 'danger', 7000);
+            return null;
+        }
     }
 
+    // 3. (Fallback for exporter/admin if no ID is in settings) - Search by name and create if not found.
+    //    If importer reaches here (no ID in settings), they must be prompted.
+    if (!isExporter) {
+         showAlert('لم يتم تعيين معرف مجلد Google Drive في الإعدادات. يرجى إضافته في قسم "الإعدادات والتقارير" أو طلبه من مدير الفريق.', 'warning', 7000);
+         return null;
+    }
+
+    // This part below is now ONLY for the exporter (likely admin/owner) if no ID is set in settings
+    // console.log("No folder ID in settings. Exporter will search by name or create.");
     try {
-        const response = await gapi.client.drive.files.list({
+        const listResponse = await gapi.client.drive.files.list({
             q: `mimeType='application/vnd.google-apps.folder' and name='${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}' and trashed=false`,
-            fields: 'files(id, name, capabilities)',
+            fields: 'files(id, name, capabilities, ownedByMe)',
             spaces: 'drive'
         });
 
-        if (response.result.files && response.result.files.length > 0) {
-            const folder = response.result.files[0];
-            if (isExporter && !folder.capabilities.canAddChildren) {
-                showAlert(`تم العثور على المجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" ولكن ليس لديك إذن لإضافة ملفات إليه.`, 'danger');
-                targetDriveFolderId = null;
+        let foundFolder = null;
+        if (listResponse.result.files && listResponse.result.files.length > 0) {
+            foundFolder = listResponse.result.files.find(f => f.ownedByMe) || listResponse.result.files[0]; // Prefer owned
+        }
+
+        if (foundFolder) {
+            if (!foundFolder.capabilities.canAddChildren) {
+                showAlert(`تم العثور على المجلد "${foundFolder.name}" ولكن ليس لديك إذن لإضافة ملفات إليه.`, 'danger');
                 return null;
             }
-            targetDriveFolderId = folder.id;
-            // console.log(`Target folder "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" identified with ID: ${targetDriveFolderId}`);
+            targetDriveFolderId = foundFolder.id;
+            data.settings.sharedDriveFolderId = targetDriveFolderId; // Save to settings
+            await saveData();
+            showAlert(`تم استخدام مجلد فريق موجود باسم "${foundFolder.name}". تم حفظ معرف المجلد (${targetDriveFolderId}) في الإعدادات.`, 'info', 7000);
             return targetDriveFolderId;
-        } else if (isExporter) {
+        } else { // Folder not found by name, and we are an exporter, so create it.
             // console.log(`Folder "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" not found. Creating it as exporter.`);
             const fileMetadata = {
                 'name': REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME,
@@ -617,46 +669,44 @@ async function identifyTargetDriveFolder(isExporter = false) {
             };
             const createResponse = await gapi.client.drive.files.create({
                 resource: fileMetadata,
-                fields: 'id'
+                fields: 'id, name'
             });
             targetDriveFolderId = createResponse.result.id;
-            showAlert(`تم إنشاء مجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" في Google Drive الخاص بك. يرجى مشاركته مع رئيسك.`, 'info', 7000);
-            // console.log(`Folder "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" created with ID: ${targetDriveFolderId}`);
+            data.settings.sharedDriveFolderId = targetDriveFolderId; // Save to settings
+            await saveData();
+            showAlert(`تم إنشاء مجلد جديد باسم "${createResponse.result.name}" (ID: ${targetDriveFolderId}). تم حفظ المعرف في الإعدادات. يرجى مشاركة هذا المجلد من Google Drive مع فريقك وتزويدهم بالمعرف.`, 'success', 15000);
             return targetDriveFolderId;
-        } else {
-            showAlert(`لم يتم العثور على مجلد باسم "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}". تأكد من أنه تمت مشاركته معك بالاسم الصحيح.`, 'warning');
-            targetDriveFolderId = null;
-            return null;
         }
     } catch (err) {
-        console.error("Error identifying target Drive folder:", err);
-        showAlert('خطأ في تحديد مجلد Google Drive: ' + (err.result?.error?.message || err.message), 'danger');
-        targetDriveFolderId = null;
+        console.error("Error in name search/creation for target Drive folder:", err);
+        showAlert('خطأ في البحث عن/إنشاء مجلد Google Drive: ' + (err.result?.error?.message || err.message), 'danger');
         return null;
     }
 }
 
 
-async function checkAndPerformCloudAction(actionFunction, cloudActionType = 'export') {
+async function checkAndPerformCloudAction(actionFunction, cloudActionType = 'export', isCalledFromAuthCallback = false) {
     if (!gapiInited || !gisInited) {
         showAlert('Google API ليست جاهزة بعد. يرجى المحاولة مرة أخرى بعد لحظات.', 'warning');
         return;
     }
-    setCloudButtonLoadingState(true, cloudActionType);
+    if (!isCalledFromAuthCallback) { // Don't set loading if called from auth callback, already loading
+        setCloudButtonLoadingState(true, cloudActionType);
+    }
 
     const token = gapi.client.getToken();
     isGapiClientAuthed = (token !== null && token.access_token);
 
     if (!isGapiClientAuthed) {
         // console.log("No valid token found, requesting access token for cloud action.");
-        pendingCloudAction = actionFunction;
-        tokenClient.requestAccessToken({}); // Default behavior, GSI handles popups if needed
+        pendingCloudAction = actionFunction; // Store the original action (exportToCloud or importFromCloud)
+        tokenClient.requestAccessToken({});
     } else {
         // console.log("Valid token found, proceeding with cloud action.");
-        const folderReady = await identifyTargetDriveFolder(cloudActionType === 'export');
-        if (folderReady) {
+        const folderId = await identifyTargetDriveFolder(cloudActionType === 'export');
+        if (folderId) {
              try {
-                await actionFunction();
+                await actionFunction(); // Execute the original action (exportToCloud or importFromCloud)
             } catch (err) {
                 console.error("Cloud action error with existing token:", err);
                 if (err.status === 401 || (err.result && err.result.error && err.result.error.code === 401) ) {
@@ -664,7 +714,7 @@ async function checkAndPerformCloudAction(actionFunction, cloudActionType = 'exp
                     gapi.client.setToken(null);
                     isGapiClientAuthed = false;
                     updateGoogleSignInButtonVisibility();
-                    targetDriveFolderId = null;
+                    targetDriveFolderId = null; // Reset cached folder ID
                     pendingCloudAction = actionFunction;
                     tokenClient.requestAccessToken({});
                 } else {
@@ -673,13 +723,16 @@ async function checkAndPerformCloudAction(actionFunction, cloudActionType = 'exp
                 }
             }
         } else {
-            setCloudButtonLoadingState(false, cloudActionType); // Folder not ready, error shown by identifyTargetDriveFolder
+            // Error message would have been shown by identifyTargetDriveFolder
+            // For example, if importer has no ID set, or exporter's set ID is invalid.
+            // showAlert('فشل تهيئة مجلد Google Drive. لا يمكن متابعة العملية السحابية.', 'warning'); // identifyTargetDriveFolder shows more specific alerts
+            setCloudButtonLoadingState(false, cloudActionType);
         }
     }
 }
 
 
-async function listDriveFiles(folderIdToQuery) { // Renamed parameter for clarity
+async function listDriveFiles(folderIdToQuery) {
     try {
         const response = await gapi.client.drive.files.list({
             q: `'${folderIdToQuery}' in parents and name contains '${REVIVE_SUBS_BACKUP_FILENAME_PREFIX}' and trashed=false`,
@@ -719,7 +772,7 @@ function generateCloudBackupFilename() {
     return `${REVIVE_SUBS_BACKUP_FILENAME_PREFIX}${year}${month}${day}_${hours}${minutes}${seconds}.json`;
 }
 
-async function uploadToDrive(folderIdToUploadIn, fileName, content) { // Renamed parameter
+async function uploadToDrive(folderIdToUploadIn, fileName, content) {
     const boundary = '-------314159265358979323846';
     const delimiter = "\r\n--" + boundary + "\r\n";
     const close_delim = "\r\n--" + boundary + "--";
@@ -732,7 +785,7 @@ async function uploadToDrive(folderIdToUploadIn, fileName, content) { // Renamed
 
     const multipartRequestBody =
         delimiter +
-        'Content-Type: application/json; charset=UTF-F\r\n\r\n' +
+        'Content-Type: application/json; charset=UTF-8\r\n\r\n' + // Corrected charset
         JSON.stringify(metadata) +
         delimiter +
         'Content-Type: application/json\r\n\r\n' +
@@ -758,15 +811,16 @@ async function uploadToDrive(folderIdToUploadIn, fileName, content) { // Renamed
 }
 
 async function exportToCloud() {
-    if (!targetDriveFolderId) { // Relies on targetDriveFolderId being set correctly by identifyTarget...
-        showAlert('لم يتم تحديد مجلد Google Drive للتصدير. حاول مرة أخرى.', 'warning');
+    // targetDriveFolderId should be set by identifyTargetDriveFolder called by checkAndPerformCloudAction
+    if (!targetDriveFolderId) {
+        showAlert('لم يتم تحديد مجلد Google Drive للتصدير. تحقق من الإعدادات أو أعد المحاولة.', 'warning');
         setCloudButtonLoadingState(false, 'export');
         return;
     }
     try {
         const existingFiles = await listDriveFiles(targetDriveFolderId);
         if (existingFiles.length >= MAX_CLOUD_BACKUPS) {
-            const filesToDelete = existingFiles.slice(MAX_CLOUD_BACKUPS -1);
+            const filesToDelete = existingFiles.slice(MAX_CLOUD_BACKUPS -1); // Keep MAX_CLOUD_BACKUPS-1 newest, delete older
             for (const oldFile of filesToDelete) {
                 await deleteDriveFile(oldFile.id);
             }
@@ -777,8 +831,8 @@ async function exportToCloud() {
         const uploadResult = await uploadToDrive(targetDriveFolderId, fileName, fileContent);
 
         if (uploadResult) {
-            showAlert(`تم تصدير البيانات إلى مجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}" في Google Drive بنجاح كـ ${fileName}`, 'success');
-            logRecentActivity(`تصدير البيانات إلى Google Drive (مجلد الفريق): ${fileName}`);
+            showAlert(`تم تصدير البيانات إلى Google Drive بنجاح كـ ${fileName} في المجلد (ID: ${targetDriveFolderId})`, 'success');
+            logRecentActivity(`تصدير البيانات إلى Google Drive: ${fileName}`);
         }
     } catch (error) {
         console.error("Error in exportToCloud process:", error);
@@ -794,7 +848,7 @@ async function downloadDriveFileContent(fileId) {
             fileId: fileId,
             alt: 'media'
         });
-        return response.body;
+        return response.body; // This is a string
     } catch (err) {
         console.error("Error downloading file content from Drive:", err);
         showAlert('خطأ في تحميل محتوى الملف من Google Drive: ' + (err.result?.error?.message || err.message), 'danger');
@@ -803,8 +857,9 @@ async function downloadDriveFileContent(fileId) {
 }
 
 async function importFromCloud() {
-    if (!targetDriveFolderId) { // Relies on targetDriveFolderId being set correctly
-        showAlert('لم يتم تحديد مجلد Google Drive للاستيراد. تأكد من أنه تمت مشاركته معك بالاسم الصحيح.', 'warning');
+    // targetDriveFolderId should be set by identifyTargetDriveFolder called by checkAndPerformCloudAction
+    if (!targetDriveFolderId) {
+        showAlert('لم يتم تحديد مجلد Google Drive للاستيراد. تحقق من الإعدادات أو أعد المحاولة.', 'warning');
         setCloudButtonLoadingState(false, 'import');
         return;
     }
@@ -819,7 +874,7 @@ async function importFromCloud() {
         filesListEl.innerHTML = '';
 
         if (files.length === 0) {
-            filesListEl.innerHTML = `<li class="text-center text-muted">لا توجد نسخ احتياطية في مجلد "${REVIVE_SUBS_TEAM_SHARED_FOLDER_NAME}".</li>`;
+            filesListEl.innerHTML = `<li class="text-center text-muted">لا توجد نسخ احتياطية في مجلد Google Drive المحدد (ID: ${targetDriveFolderId}).</li>`;
             return;
         }
 
@@ -836,22 +891,26 @@ async function importFromCloud() {
                     return;
                 }
                 closeModal('cloudImportModal');
-                setCloudButtonLoadingState(true, 'import');
+                setCloudButtonLoadingState(true, 'import'); // Show loading specifically for this part
 
-                const fileContent = await downloadDriveFileContent(file.id);
-                if (fileContent) {
+                const fileContentString = await downloadDriveFileContent(file.id);
+                if (fileContentString) {
                     try {
-                        const imported = JSON.parse(fileContent);
+                        const imported = JSON.parse(fileContentString);
                         const defaultStructure = initializeDefaultDataStructure(false);
                         if (imported && imported.settings && Array.isArray(imported.members) && Array.isArray(imported.anime) && Array.isArray(imported.series)) {
                             data = { ...defaultStructure, ...imported };
+                            // Ensure all default settings keys exist, merging with imported ones
                             data.settings = { ...defaultStructure.settings, ...(imported.settings || {}) };
-                            data.members.forEach(m => { });
-                            if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
+                            // Ensure arrays exist even if empty in imported data
+                            data.members = imported.members || [];
+                            data.anime = imported.anime || [];
+                            data.series = imported.series || [];
+                            data.recentActivityLog = imported.recentActivityLog || [];
                             
                             await saveData();
                             unsavedChanges = false;
-                            logRecentActivity(`استيراد من Google Drive (مجلد الفريق): ${file.name}`);
+                            logRecentActivity(`استيراد من Google Drive: ${file.name}`);
                             showAlert('تم استيراد البيانات من Google Drive بنجاح.', 'success');
                             updateAllDisplays();
                         } else {
@@ -868,6 +927,7 @@ async function importFromCloud() {
         });
 
     } catch (error) {
+        console.error("Error listing/processing files for cloud import:", error);
         getEl('cloudBackupFilesList').innerHTML = '<li class="text-center text-danger">خطأ في جلب قائمة الملفات.</li>';
     } finally {
         toggleVisibility('cloudImportSpinner', false);
@@ -875,27 +935,53 @@ async function importFromCloud() {
 }
 
 function setCloudButtonLoadingState(isLoading, type = 'both') { 
-    const importBtnLink = getEl('importCloudBtn'); // The <a> tag
-    const exportBtnLink = getEl('exportCloudBtn'); // The <a> tag
+    const importBtnLink = getEl('importCloudBtn');
+    const exportBtnLink = getEl('exportCloudBtn');
     const loadingSpinner = ' <i class="fas fa-spinner fa-spin"></i>';
 
     if (type === 'import' || type === 'both') {
-        if (importBtnLink) importBtnLink.innerHTML = isLoading ? 'جاري الاستيراد...' + loadingSpinner : 'استيراد سحابي (Drive)';
+        if (importBtnLink) importBtnLink.innerHTML = isLoading ? 'جاري...' + loadingSpinner : 'استيراد سحابي (Drive)';
     }
     if (type === 'export' || type === 'both') {
-        if (exportBtnLink) exportBtnLink.innerHTML = isLoading ? 'جاري التصدير...' + loadingSpinner : 'تصدير سحابي (Drive)';
+        if (exportBtnLink) exportBtnLink.innerHTML = isLoading ? 'جاري...' + loadingSpinner : 'تصدير سحابي (Drive)';
     }
 }
 
 function openDB(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,DB_VERSION);request.onupgradeneeded=(event)=>{const db=event.target.result;if(!db.objectStoreNames.contains(STORE_NAME))db.createObjectStore(STORE_NAME);};request.onsuccess=(event)=>resolve(event.target.result);request.onerror=(event)=>{console.error("IndexedDB error:",event.target.errorCode);reject(event.target.errorCode);};});}
-async function loadData(){try{const db=await openDB();const transaction=db.transaction(STORE_NAME,"readonly");const store=transaction.objectStore(STORE_NAME);const request=store.get(MAIN_DATA_KEY);return new Promise((resolve,reject)=>{request.onsuccess=async(event)=>{const savedData=event.target.result;const defaultStructure=initializeDefaultDataStructure(false);if(savedData){if(savedData.version!==data.version)console.warn(`Data version mismatch. Current: ${data.version}, Saved: ${savedData.version}. Attempting to merge.`);data={...defaultStructure,...savedData};data.settings={...defaultStructure.settings,...(savedData.settings||{})};data.members=(savedData.members||[]);data.anime=savedData.anime||[];data.series=savedData.series||[];data.recentActivityLog=savedData.recentActivityLog||[];}else{data=defaultStructure;await saveData();}
+async function loadData(){try{const db=await openDB();const transaction=db.transaction(STORE_NAME,"readonly");const store=transaction.objectStore(STORE_NAME);const request=store.get(MAIN_DATA_KEY);return new Promise((resolve,reject)=>{request.onsuccess=async(event)=>{const savedData=event.target.result;const defaultStructure=initializeDefaultDataStructure(false);if(savedData){if(savedData.version!==data.version)console.warn(`Data version mismatch. Current: ${data.version}, Saved: ${savedData.version}. Attempting to merge.`);data={...defaultStructure,...savedData};data.settings={...defaultStructure.settings,...(savedData.settings||{})}; // Deep merge settings
+data.members=(Array.isArray(savedData.members) ? savedData.members : defaultStructure.members);
+data.anime=(Array.isArray(savedData.anime) ? savedData.anime : defaultStructure.anime);
+data.series=(Array.isArray(savedData.series) ? savedData.series : defaultStructure.series);
+data.recentActivityLog=(Array.isArray(savedData.recentActivityLog) ? savedData.recentActivityLog : defaultStructure.recentActivityLog);
+}else{data=defaultStructure;await saveData();}
 updateHeaderDisplay();updateHeaderSocialLinks();unsavedChanges=false;resolve();};request.onerror=(event)=>{console.error('Error loading data from IndexedDB:',event.target.errorCode);requestAnimationFrame(()=>showAlert('خطأ في تحميل البيانات. سيتم استخدام البيانات الافتراضية.','danger'));data=initializeDefaultDataStructure(false);resolve();};});}catch(error){console.error("Failed to open DB for loading:",error);requestAnimationFrame(()=>showAlert('فشل فتح قاعدة البيانات. سيتم استخدام البيانات الافتراضية.','danger'));data=initializeDefaultDataStructure(false);return Promise.resolve();}}
-function initializeDefaultDataStructure(setGlobal=true){const defaultStructure={version:"2.9.8",lastSaved:new Date().toISOString(),settings:{headerLogoUrl:"",headerLinkWebsiteUrl:"#",headerLinkDiscordUrl:"#",headerLinkTelegramUrl:"#",headerLinkDriveUrl:"#"},members:[],anime:[],series:[],recentActivityLog:[]};if(setGlobal)data=JSON.parse(JSON.stringify(defaultStructure));return defaultStructure;}
+
+function initializeDefaultDataStructure(setGlobal=true){
+    const defaultStructure={
+        version:"2.9.8",
+        lastSaved:new Date().toISOString(),
+        settings:{
+            headerLogoUrl:"",
+            headerLinkWebsiteUrl:"#",
+            headerLinkDiscordUrl:"#",
+            headerLinkTelegramUrl:"#",
+            headerLinkDriveUrl:"#",
+            sharedDriveFolderId: "" // Added new setting
+        },
+        members:[],
+        anime:[],
+        series:[],
+        recentActivityLog:[]
+    };
+    if(setGlobal)data=JSON.parse(JSON.stringify(defaultStructure));
+    return defaultStructure;
+}
+
 async function saveData(){try{const db=await openDB();const transaction=db.transaction(STORE_NAME,"readwrite");const store=transaction.objectStore(STORE_NAME);data.lastSaved=new Date().toISOString();const request=store.put(data,MAIN_DATA_KEY);return new Promise((resolve,reject)=>{request.onsuccess=()=>{unsavedChanges=false;/*console.log('Data saved to IndexedDB successfully.');*/resolve(true);};request.onerror=(event)=>{console.error('Error saving data to IndexedDB:',event.target.errorCode);requestAnimationFrame(()=>showAlert('خطأ أثناء حفظ البيانات في IndexedDB!','danger'));reject(false);};});}catch(error){console.error("Failed to open DB for saving:",error);requestAnimationFrame(()=>showAlert('فشل فتح قاعدة البيانات للحفظ!','danger'));return Promise.resolve(false);}}
 async function manualSaveData(){if(await saveData()){requestAnimationFrame(()=>showAlert('تم حفظ البيانات يدوياً بنجاح!','success'));logRecentActivity(`تم حفظ جميع البيانات يدوياً.`);}else{unsavedChanges=true;}}
 
 document.addEventListener('DOMContentLoaded',async function(){
-    initializeApp(); // initializeApp now contains the GAPI/GIS ready checks
+    initializeApp();
     getEl('globalSearchToggleBtn').addEventListener('click',()=>{getEl('globalSearchInput').classList.toggle('hidden');if(!getEl('globalSearchInput').classList.contains('hidden')){getEl('globalSearchInput').focus();}});
     getEl('globalSaveBtn').addEventListener('click',manualSaveData);
 
@@ -934,8 +1020,8 @@ document.addEventListener('DOMContentLoaded',async function(){
         if (!gisInited || !gapiInited) {
             showAlert('Google API ليست جاهزة. يرجى الانتظار.', 'warning'); return;
         }
-        pendingCloudAction = null;
-        tokenClient.requestAccessToken({}); // No prompt, GSI decides
+        pendingCloudAction = null; // Clear any previous pending action before new sign-in attempt
+        tokenClient.requestAccessToken({});
     });
     getEl('googleSignOutBtn').addEventListener('click', handleSignOutClick);
 });
@@ -950,15 +1036,15 @@ function closeAllDropdowns() {
 
 async function initializeApp(){
     try{
-        await loadData();
+        await loadData(); // This also calls initializeDefaultDataStructure if no data
     } catch(error){
         console.error("Error during initial data load:",error);
         requestAnimationFrame(()=>showAlert("حدث خطأ أثناء تحميل البيانات الأولية.","danger"));
-        data=initializeDefaultDataStructure(false);
+        data=initializeDefaultDataStructure(true); // Ensure data is initialized
     }
     
     recalculateAllMemberData();
-    updateAllDisplays();
+    updateAllDisplays(); // This calls loadSettings() among others
     populateMemberReportDropdown();
     
     const animeStatusFilterEl=getEl(PROJECT_CONFIG.anime.statusFilterId);
@@ -966,8 +1052,8 @@ async function initializeApp(){
     const seriesStatusFilterEl=getEl(PROJECT_CONFIG.series.statusFilterId);
     if(seriesStatusFilterEl)seriesStatusFilterEl.value='جارٍ';
     
-    updateAllDisplays();
-    populateMemberReportDropdown();
+    // updateAllDisplays(); // Already called above
+    // populateMemberReportDropdown(); // Already called above
 
     window.addEventListener('beforeunload',(e)=>{
         if(unsavedChanges){
@@ -982,7 +1068,7 @@ async function initializeApp(){
     ['members','anime','series'].forEach(type=>updateDeleteButtonText(type));
 
     setTimeout(() => {
-        updateGoogleSignInButtonVisibility();
+        updateGoogleSignInButtonVisibility(); // Ensure button state is correct after GAPI/GIS init
     }, 1500); 
 }
 
@@ -1015,7 +1101,7 @@ function filterProjects(type,statusFilter){currentFilteredAndSortedItems[type]=g
 function loadDataIntoGrid(type,itemsToLoad){const effectiveType=type==='member'?'members':type;const gridContainerId=PROJECT_CONFIG[effectiveType]?.cardGridId||`${effectiveType}CardGrid`;const gridContainer=getEl(gridContainerId);const placeholderId=`${effectiveType}CardPlaceholder`;const placeholder=getEl(placeholderId);if(!gridContainer)return;requestAnimationFrame(()=>{gridContainer.innerHTML='';if(intersectionObservers[effectiveType]){intersectionObservers[effectiveType].disconnect();intersectionObservers[effectiveType]=null;}
 lazyLoadCounters[effectiveType]=0;if(itemsToLoad.length===0){const entityName=type==='members'?'أعضاء':(PROJECT_CONFIG[type]?.nameLabel||'عناصر');if(placeholder){placeholder.textContent=`لا يوجد ${entityName} لعرضهم.`;placeholder.style.display='block';gridContainer.appendChild(placeholder);}else gridContainer.innerHTML=`<div class="card-placeholder">لا يوجد ${entityName} لعرضهم.</div>`;updateMasterCheckbox(type);return;}
 if(placeholder)placeholder.style.display='none';currentFilteredAndSortedItems[effectiveType]=itemsToLoad;loadNextBatch(type);});}
-function loadNextBatch(type){const effectiveType=type==='member'?'members':type;const gridContainerId=PROJECT_CONFIG[effectiveType]?.cardGridId||`${effectiveType}CardGrid`;const gridContainer=getEl(gridContainerId);const templateId=type==='members'?'memberCardTemplate':'projectCardTemplate';const template=getEl(templateId);if(!gridContainer||!template)return;const itemsToLoad=currentFilteredAndSortedItems[effectiveType];if(!itemsToLoad)return;const startIndex=lazyLoadCounters[effectiveType];const endIndex=Math.min(startIndex+LAZY_LOAD_BATCH_SIZE,itemsToLoad.length);const fragment=document.createDocumentFragment();for(let i=startIndex;i<endIndex;i++){const item=itemsToLoad[i];if(!item||!item.id)continue;const clone=template.content.cloneNode(true);const cardElement=clone.querySelector('.member-card, .project-card');cardElement.dataset.id=item.id;cardElement.style.cursor='default';let itemSpecificType=type==='archive'?(item.projectTypeInternal||(data.anime.some(a=>a.id===item.id)?'anime':'series')):type;cardElement.dataset.type=itemSpecificType;type==='members'?populateMemberCard(cardElement,item):populateProjectCard(cardElement,item,itemSpecificType);fragment.appendChild(clone);}
+function loadNextBatch(type){const effectiveType=type==='member'?'members':type;const gridContainerId=PROJECT_CONFIG[effectiveType]?.cardGridId||`${effectiveType}CardGrid`;const gridContainer=getEl(gridContainerId);const templateId=type==='members'?'memberCardTemplate':'projectCardTemplate';const template=getEl(templateId);if(!gridContainer||!template)return;const itemsToLoad=currentFilteredAndSortedItems[effectiveType];if(!itemsToLoad)return;const startIndex=lazyLoadCounters[effectiveType];const endIndex=Math.min(startIndex+LAZY_LOAD_BATCH_SIZE,itemsToLoad.length);const fragment=document.createDocumentFragment();for(let i=startIndex;i<endIndex;i++){const item=itemsToLoad[i];if(!item||!item.id)continue;const clone=template.content.cloneNode(true);const cardElement=clone.querySelector('.member-card, . project-card');cardElement.dataset.id=item.id;cardElement.style.cursor='default';let itemSpecificType=type==='archive'?(item.projectTypeInternal||(data.anime.some(a=>a.id===item.id)?'anime':'series')):type;cardElement.dataset.type=itemSpecificType;type==='members'?populateMemberCard(cardElement,item):populateProjectCard(cardElement,item,itemSpecificType);fragment.appendChild(clone);}
 requestAnimationFrame(()=>{gridContainer.appendChild(fragment);lazyLoadCounters[effectiveType]=endIndex;const oldSentinel=gridContainer.querySelector('.lazy-load-sentinel');if(oldSentinel)oldSentinel.remove();if(endIndex<itemsToLoad.length){const sentinel=document.createElement('div');sentinel.className='lazy-load-sentinel';gridContainer.appendChild(sentinel);if(intersectionObservers[effectiveType])intersectionObservers[effectiveType].disconnect();intersectionObservers[effectiveType]=new IntersectionObserver(entries=>{if(entries[0].isIntersecting)loadNextBatch(type);},{rootMargin:'200px'});intersectionObservers[effectiveType].observe(sentinel);}
 updateMasterCheckbox(type);});}
 function updateCardInDOM(originalType,itemId,itemData){const typeForGrid=originalType==='member'?'members':originalType;const gridContainerId=PROJECT_CONFIG[typeForGrid]?.cardGridId||`${typeForGrid}CardGrid`;const cardElement=document.querySelector(`#${gridContainerId} .card[data-id="${itemId}"]`);if(cardElement&&itemData){requestAnimationFrame(()=>{const parent=cardElement.parentElement,scrollTop=parent?parent.scrollTop:0;let itemSpecificType=originalType;if(originalType==='archive'&&itemData){itemSpecificType=itemData.projectTypeInternal||(data.anime.some(a=>a.id===itemId)?'anime':'series');}
@@ -1073,7 +1159,7 @@ if(idsToDelete.has(p.timerId)){p.timerId=null;ch=true;}
 if(idsToDelete.has(p.subtitlerId)){p.subtitlerId=null;ch=true;}
 if(ch)affectedPIds.add(p.id);}));affectedPIds.forEach(pId=>{let p=data.anime.find(pr=>pr.id===pId)||data.series.find(pr=>pr.id===pId);if(p){p.totalCost=(p.completedEpisodes*(p.translationPrice||0))+(p.translationBonus||0)+(p.completedEpisodes*(p.editingPrice||0))+(p.editingBonus||0)+(p.completedEpisodes*(p.timerPrice||0))+(p.timerBonus||0)+(p.completedEpisodes*(p.subtitlerPrice||0))+(p.subtitlerBonus||0);const pTypeDOM=data.anime.some(a=>a.id===pId)?'anime':'series';updateCardInDOM(pTypeDOM,pId,p);}});sortAndLoadData('members',currentSort.members);updateMemberDropdowns();}else sortAndLoadData(type,currentSort[type]);recalculateAllMemberData();saveData().then(s=>{if(!s)unsavedChanges=true;});updateDashboard();requestAnimationFrame(()=>showAlert(`تم حذف العناصر المحددة بنجاح.`,'success'));}}
 function exportAllData(){downloadFile(JSON.stringify(data,null,2),`ReviveSubs_FullBackup_${new Date().toISOString().split('T')[0]}.json`,'application/json;charset=utf-8;');logRecentActivity('تصدير جميع البيانات (JSON)');requestAnimationFrame(()=>showAlert('تم تصدير جميع البيانات بنجاح.','success'));}
-function importData(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=async(event)=>{const file=event.target.files[0];if(file&&confirm('سيؤدي استيراد البيانات إلى الكتابة فوق جميع البيانات الحالية. هل أنت متأكد؟')){const reader=new FileReader();reader.onload=async(e)=>{try{const imported=JSON.parse(e.target.result);const defaultStructure=initializeDefaultDataStructure(false);if(imported&&imported.settings&&Array.isArray(imported.members)&&Array.isArray(imported.anime)&&Array.isArray(imported.series)){data={...defaultStructure,...imported};data.settings={...defaultStructure.settings,...(imported.settings||{})};data.members.forEach(m=>{});if(!Array.isArray(data.recentActivityLog))data.recentActivityLog=[];await saveData();unsavedChanges=false;logRecentActivity(`استيراد ملف: ${file.name}`);requestAnimationFrame(()=>showAlert('تم استيراد البيانات بنجاح.','success'));updateAllDisplays();}else requestAnimationFrame(()=>showAlert('ملف الاستيراد غير صالح.','danger'));}catch(error){console.error("Error importing data:",error);requestAnimationFrame(()=>showAlert('خطأ أثناء استيراد البيانات.','danger'));}};reader.readAsText(file);}};input.click();}
+function importData(){const input=document.createElement('input');input.type='file';input.accept='.json';input.onchange=async(event)=>{const file=event.target.files[0];if(file&&confirm('سيؤدي استيراد البيانات إلى الكتابة فوق جميع البيانات الحالية. هل أنت متأكد؟')){const reader=new FileReader();reader.onload=async(e)=>{try{const imported=JSON.parse(e.target.result);const defaultStructure=initializeDefaultDataStructure(false);if(imported&&imported.settings&&Array.isArray(imported.members)&&Array.isArray(imported.anime)&&Array.isArray(imported.series)){data={...defaultStructure,...imported};data.settings={...defaultStructure.settings,...(imported.settings||{})};data.members = imported.members || []; data.anime = imported.anime || []; data.series = imported.series || []; data.recentActivityLog = imported.recentActivityLog || []; await saveData();unsavedChanges=false;logRecentActivity(`استيراد ملف: ${file.name}`);requestAnimationFrame(()=>showAlert('تم استيراد البيانات بنجاح.','success'));updateAllDisplays();}else requestAnimationFrame(()=>showAlert('ملف الاستيراد غير صالح.','danger'));}catch(error){console.error("Error importing data:",error);requestAnimationFrame(()=>showAlert('خطأ أثناء استيراد البيانات.','danger'));}};reader.readAsText(file);}};input.click();}
 function downloadFile(content,filename,contentType){const a=document.createElement('a'),file=new Blob([content],{type:contentType});a.href=URL.createObjectURL(file);a.download=filename;a.click();URL.revokeObjectURL(a.href);}
 const JIKAN_API_BASE_URL="https://api.jikan.moe/v4",TMDB_API_BASE_URL="https://api.themoviedb.org/3",TMDB_API_KEY="6b65819086d354cbdf267b26693c4147";
 async function fetchExternalData(type){const config=PROJECT_CONFIG[type];setDisabled(config.fetchButtonId,true);toggleVisibility(config.fetchLoaderId,true,false);try{if(type==='anime'){let malId=getVal('projectMalId');if(!malId&&getVal('projectUrl')){const m=getVal('projectUrl').match(/myanimelist\.net\/anime\/(\d+)/);if(m&&m[1]){malId=m[1];setVal('projectMalId',malId);}}
@@ -1128,8 +1214,48 @@ function printReport(){const content=getEl('reportContent').innerHTML;if(!conten
 window.print();}
 function saveReportAsHTML(){const content=getEl('reportContent').innerHTML;if(!content||content.trim()===''||content.includes("اختر نوع التقرير")){showAlert('يجب إنشاء تقرير أولاً.','warning');return;}
 const fullHtml=`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير - ${new Date().toLocaleDateString('ar-EG')}</title><style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;margin:0 auto;max-width:1000px;background-color:var(--bg-primary-user, #0f0f0f);color:var(--text-main, #fff);} :root{--border-color:#333;--accent-green:#10b981;--accent-yellow:#f59e0b;--accent-red:#ef4444;--report-header-bg-var:#1a1a1a;--report-table-th-bg-var:#242424;} table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid var(--border-color);padding:8px;text-align:right}th{background-color:var(--report-table-th-bg-var)}.report-header{background:var(--report-header-bg-var);padding:20px;margin-bottom:20px;border-radius:8px;border:1px solid var(--border-color)}.report-section{margin:20px 0;padding:15px;border:1px solid var(--border-color);border-radius:8px}.money-positive{color:var(--accent-green)}.money-zero{color:var(--accent-yellow)}.money-negative{color:var(--accent-red)}.table-container{overflow-x:auto}</style></head><body><h1>ReviveSubs</h1>${content}<hr><p>التاريخ: ${new Date().toLocaleString('en-US')}</p></body></html>`;downloadFile(fullHtml,`ReviveSubs_Report_${new Date().toISOString().split('T')[0]}.html`,'text/html');}
-function loadSettings(){requestAnimationFrame(()=>{setVal('headerLogoUrl',data.settings.headerLogoUrl||"");setVal('headerLinkWebsiteUrl',data.settings.headerLinkWebsiteUrl||"");setVal('headerLinkDiscordUrl',data.settings.headerLinkDiscordUrl||"");setVal('headerLinkTelegramUrl',data.settings.headerLinkTelegramUrl||"");setVal('headerLinkDriveUrl',data.settings.headerLinkDriveUrl||"");updateHeaderDisplay();updateHeaderSocialLinks();populateMemberReportDropdown();});}
-function updateSettings(){data.settings.headerLogoUrl=getVal('headerLogoUrl');data.settings.headerLinkWebsiteUrl=getVal('headerLinkWebsiteUrl');data.settings.headerLinkDiscordUrl=getVal('headerLinkDiscordUrl');data.settings.headerLinkTelegramUrl=getVal('headerLinkTelegramUrl');data.settings.headerLinkDriveUrl=getVal('headerLinkDriveUrl');updateHeaderDisplay();updateHeaderSocialLinks();unsavedChanges=true;saveData().then(success=>{if(!success)unsavedChanges=true;});requestAnimationFrame(()=>showAlert('تم حفظ الإعدادات بنجاح.','success'));logRecentActivity('تم تحديث الإعدادات.');}
+
+function loadSettings(){
+    requestAnimationFrame(()=>{
+        setVal('headerLogoUrl',data.settings.headerLogoUrl||"");
+        setVal('headerLinkWebsiteUrl',data.settings.headerLinkWebsiteUrl||"");
+        setVal('headerLinkDiscordUrl',data.settings.headerLinkDiscordUrl||"");
+        setVal('headerLinkTelegramUrl',data.settings.headerLinkTelegramUrl||"");
+        setVal('headerLinkDriveUrl',data.settings.headerLinkDriveUrl||"");
+        setVal('sharedDriveFolderId', data.settings.sharedDriveFolderId || ""); // Load new setting
+        updateHeaderDisplay();
+        updateHeaderSocialLinks();
+        populateMemberReportDropdown();
+    });
+}
+
+function updateSettings(){
+    data.settings.headerLogoUrl=getVal('headerLogoUrl');
+    data.settings.headerLinkWebsiteUrl=getVal('headerLinkWebsiteUrl');
+    data.settings.headerLinkDiscordUrl=getVal('headerLinkDiscordUrl');
+    data.settings.headerLinkTelegramUrl=getVal('headerLinkTelegramUrl');
+    data.settings.headerLinkDriveUrl=getVal('headerLinkDriveUrl');
+    
+    const newFolderId = getVal('sharedDriveFolderId');
+    if (data.settings.sharedDriveFolderId !== newFolderId) {
+        data.settings.sharedDriveFolderId = newFolderId;
+        targetDriveFolderId = null; // Reset cached folder ID if it's changed in settings
+        console.log("Shared Drive Folder ID setting updated in app data. Cached targetDriveFolderId reset.");
+    }
+
+    updateHeaderDisplay();
+    updateHeaderSocialLinks();
+    unsavedChanges=true;
+    saveData().then(success=>{
+        if(!success) unsavedChanges=true;
+        else {
+            // console.log("Settings saved, sharedDriveFolderId is now:", data.settings.sharedDriveFolderId);
+        }
+    });
+    requestAnimationFrame(()=>showAlert('تم حفظ الإعدادات بنجاح.','success'));
+    logRecentActivity('تم تحديث الإعدادات.');
+}
+
 function updateHeaderDisplay(){requestAnimationFrame(()=>{const headerElement=document.querySelector('.header');const logoUrl=data.settings.headerLogoUrl;if(logoUrl&&isValidUrl(logoUrl)){headerElement.style.backgroundImage=`url('${logoUrl}')`;headerElement.classList.add('has-background-image');}else{headerElement.style.backgroundImage='';headerElement.style.background=`linear-gradient(135deg, var(--header-gradient-start) 0%, var(--header-gradient-end) 100%)`;headerElement.classList.remove('has-background-image');headerElement.style.height='';headerElement.style.minHeight='80px';}});}
 function updateHeaderSocialLinks(){requestAnimationFrame(()=>{getEl('headerLinkWebsite').href=data.settings.headerLinkWebsiteUrl||"#";getEl('headerLinkDiscord').href=data.settings.headerLinkDiscordUrl||"#";getEl('headerLinkTelegram').href=data.settings.headerLinkTelegramUrl||"#";getEl('headerLinkDrive').href=data.settings.headerLinkDriveUrl||"#";});}
 </script>
