@@ -313,7 +313,135 @@
             font-size: 0.9em;
             margin-left: 5px; /* For RTL, search input to the left of search button */
         }
+        /* Dropdown Styles for Global Actions */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+        .dropdown-toggle {
+            position: relative;
+            /* Ensure enough space for the arrow if not already handled by btn-icon padding */
+        }
+        .dropdown-toggle .dropdown-arrow { /* More specific selector if needed */
+            position: absolute;
+            right: 8px; /* Adjust if needed based on btn-icon padding */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7em;
+            opacity: 0.7;
+            transition: transform 0.3s ease;
+        }
+        .dropdown-toggle:hover .dropdown-arrow {
+            opacity: 1;
+        }
+        .dropdown-container.active .dropdown-arrow {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        .dropdown-menu {
+            position: absolute;
+            bottom: 100%; /* Position above the button */
+            left: 0; /* Align to the left of the button container */
+            min-width: 180px;
+            background-color: var(--bg-secondary-user);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 5px; /* Space between menu and button */
+            overflow: hidden;
+            z-index: 1600; /* Ensure it's above other elements */
+            animation: dropdownSlide 0.2s ease-out;
+        }
+        .dropdown-menu.hidden {
+            display: none;
+        }
+        @keyframes dropdownSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: none;
+            color: var(--text-main);
+            text-align: right; /* RTL */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9em;
+        }
+        .dropdown-item:hover {
+            background-color: var(--bg-hover-user);
+            color: var(--accent-purple);
+        }
+        .dropdown-item i {
+            font-size: 1.1em;
+            width: 20px; /* For icon alignment */
+            text-align: center;
+        }
 
+        /* Cloud sync loading indicator */
+        .cloud-sync-indicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--bg-secondary-user); /* Use a more prominent background */
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-xl);
+            text-align: center;
+            z-index: 10000; /* High z-index to be on top */
+            border: 1px solid var(--accent-blue);
+        }
+        .cloud-sync-indicator .spinner {
+            margin-bottom: 15px; /* Already defined, but ensure it's here */
+            border-top: 4px solid var(--accent-blue); /* Spinner color */
+        }
+        .cloud-sync-indicator p {
+            color: var(--text-main);
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        /* Cloud Status Indicator in Settings */
+        .cloud-status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background-color: var(--bg-secondary-user);
+            border-radius: 8px;
+        }
+        .cloud-status-indicator i {
+            font-size: 1.5em;
+            transition: color 0.3s ease;
+        }
+        .cloud-status-indicator.connected i {
+            color: var(--accent-green);
+            animation: pulse-green 2s infinite;
+        }
+        .cloud-status-indicator.error i {
+            color: var(--accent-red);
+        }
+        .cloud-status-indicator.syncing i {
+            color: var(--accent-blue);
+            animation: spin 1s linear infinite; /* Re-use existing spin */
+        }
+        @keyframes pulse-green {
+            0% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.7; transform: scale(1); }
+        }
+        #lastCloudSync {
+            padding: 10px;
+            background-color: var(--bg-secondary-user);
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
 
         @media (max-width: 768px) {
             .header-social-links { display: none; } 
@@ -605,7 +733,8 @@
         .settings-section .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); }
         .settings-section h3.section-title::after { content: ''; font-family: 'Font Awesome 5 Free'; font-weight: 900; margin-right: auto; opacity: 0.3; font-size: 1.2em; }
         #settings > .settings-section:nth-of-type(1) h3.section-title::after { content: '\f200'; } /* chart (reports) */
-        #settings > .settings-section:nth-of-type(2) h3.section-title::after { content: '\f0c1'; } /* link (social links) */
+        #settings > .settings-section:nth-of-type(3) h3.section-title::after { content: '\f0c1'; } /* link (social links) - Adjusted for new section order */
+        #settings > .settings-section:has(#cloudStatus) h3.section-title::after { content: '\f0c2'; } /* cloud (cloud sync settings) */
 
 
         #reportContent { background: rgba(36, 36, 36, 0.6); border: 1px solid rgba(139, 92, 246, 0.2); backdrop-filter: blur(10px); }
@@ -650,34 +779,6 @@
             .money-positive { color: #008000 !important; }
             .money-zero { color: #f59e0b !important; }
             .money-negative { color: #cc0000 !important; }
-        }
-
-        /* Dropdown Menu for Import/Export */
-        .dropdown-menu {
-            position: absolute;
-            bottom: 100%; /* Appears above the button */
-            right: 0; /* Aligns to the right edge of the parent div */
-            background: var(--bg-secondary-user);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            min-width: 80px;
-            z-index: 1600; /* Higher than global actions container */
-            box-shadow: var(--shadow-md);
-            margin-bottom: 5px; /* Space between button and menu */
-        }
-
-        .dropdown-menu a {
-            display: block;
-            padding: 8px 12px;
-            color: var(--text-main);
-            text-decoration: none;
-            cursor: pointer;
-            font-size: 0.85em;
-            text-align: center;
-        }
-
-        .dropdown-menu a:hover {
-            background: var(--bg-hover-user);
         }
     </style>
 </head>
@@ -900,6 +1001,42 @@
                         <div id="reportContent" class="mt-20 card"> <p class="text-center text-muted">اختر نوع التقرير لعرضه.</p> </div>
                     </section>
                     
+                    <!-- قسم إعدادات المزامنة السحابية -->
+                    <section class="settings-section">
+                        <h3 class="section-title">إعدادات المزامنة السحابية</h3>
+                        
+                        <div class="form-group">
+                            <label>حالة الاتصال بالسحابة</label>
+                            <div class="cloud-status-indicator" id="cloudStatus">
+                                <i class="fas fa-cloud"></i>
+                                <span id="cloudStatusText">غير متصل</span>
+                                <button class="btn btn-sm btn-info" onclick="testCloudConnection()">اختبار الاتصال</button>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="autoSaveToCloud" onchange="toggleAutoSaveToCloud()">
+                                تفعيل الحفظ التلقائي إلى السحابة (كل 5 دقائق)
+                            </label>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>آخر مزامنة سحابية ناجحة</label>
+                            <div id="lastCloudSync">لم تتم المزامنة بعد</div>
+                        </div>
+                        
+                        <div class="toolbar">
+                            <button class="btn btn-primary" onclick="syncWithCloud()">
+                                <i class="fas fa-sync"></i> مزامنة الآن (رفع/تنزيل)
+                            </button>
+                            <button class="btn btn-info" onclick="showCloudHistory()">
+                                <i class="fas fa-history"></i> سجل المزامنة
+                            </button>
+                        </div>
+                    </section>
+                    <!-- نهاية قسم إعدادات المزامنة السحابية -->
+
                     <section class="settings-section">
                         <h3 class="section-title">تعيين الروابط</h3>
                         <div class="form-group"> <label for="headerLogoUrl">رابط صورة الهيدر (للخلفية الكاملة، اختياري)</label> <input type="url" class="form-control" id="headerLogoUrl" placeholder="https://example.com/logo.png" onchange="updateSettings()"> </div>
@@ -914,25 +1051,41 @@
         <footer class="footer"> <div class="brand">ReviveSubs</div> <p>جميع البيانات محفوظة محلياً في المتصفح (IndexedDB)</p> </footer>
     </div>
 
-    <!-- Global Actions Toolbar -->
+    <!-- Global Actions Toolbar المحدث -->
     <div class="global-actions-container">
         <input type="text" id="globalSearchInput" class="search-box hidden" placeholder="بحث عام..." onkeyup="debouncedGlobalSearch()">
         <button id="globalSearchToggleBtn" class="btn-icon" title="بحث عام"><i class="fas fa-search"></i></button>
-        <button id="globalSaveBtn" class="btn-icon" title="حفظ البيانات"><i class="fas fa-save"></i></button>
+        <button id="globalSaveBtn" class="btn-icon" title="حفظ البيانات محلياً"><i class="fas fa-save"></i></button>
         
-        <div style="position:relative; display:inline-block;">
-            <button class="btn-icon" onclick="toggleDropdown('importMenu')" title="استيراد"><i class="fas fa-file-import"></i></button>
-            <div id="importMenu" class="dropdown-menu" style="display:none;">
-                <a onclick="importData('local')">محلي</a>
-                <a onclick="importData('cloud')">سحابي</a>
+        <!-- قائمة الاستيراد المنسدلة -->
+        <div class="dropdown-container">
+            <button id="globalImportBtnTrigger" class="btn-icon dropdown-toggle" title="استيراد البيانات">
+                <i class="fas fa-file-import"></i>
+                <i class="fas fa-caret-down dropdown-arrow"></i>
+            </button>
+            <div class="dropdown-menu hidden" id="importDropdown">
+                <button class="dropdown-item" onclick="importData()">
+                    <i class="fas fa-hdd"></i> استيراد محلي (JSON)
+                </button>
+                <button class="dropdown-item" onclick="importFromCloud()">
+                    <i class="fas fa-cloud-download-alt"></i> استيراد سحابي
+                </button>
             </div>
         </div>
         
-        <div style="position:relative; display:inline-block;">
-            <button class="btn-icon" onclick="toggleDropdown('exportMenu')" title="تصدير"><i class="fas fa-file-export"></i></button>
-            <div id="exportMenu" class="dropdown-menu" style="display:none;">
-                <a onclick="exportAllData('local')">محلي</a>
-                <a onclick="exportAllData('cloud')">سحابي</a>
+        <!-- قائمة التصدير المنسدلة -->
+        <div class="dropdown-container">
+            <button id="globalExportBtnTrigger" class="btn-icon dropdown-toggle" title="تصدير البيانات">
+                <i class="fas fa-file-export"></i>
+                <i class="fas fa-caret-down dropdown-arrow"></i>
+            </button>
+            <div class="dropdown-menu hidden" id="exportDropdown">
+                <button class="dropdown-item" onclick="exportAllData()">
+                    <i class="fas fa-hdd"></i> تصدير محلي (JSON)
+                </button>
+                <button class="dropdown-item" onclick="exportToCloud()">
+                    <i class="fas fa-cloud-upload-alt"></i> تصدير سحابي
+                </button>
             </div>
         </div>
     </div>
@@ -1129,41 +1282,9 @@
     </template>
 
     <script>
-        // ========== UTILITIES ==========
-        function debounce(func, delay) { let timeout; return function(...args) { const context = this; clearTimeout(timeout); timeout = setTimeout(() => func.apply(context, args), delay); }; }
-        function isValidUrl(string) { try { new URL(string); return true; } catch (_) { return false; } }
-        function isValidSocialHandle(handle, pattern) { return pattern.test(handle) || isValidUrl(handle); }
-        const twitterPattern = /^@?[a-zA-Z0-9_]{1,15}$/;
-        const telegramPattern = /^@?[a-zA-Z0-9_]{5,32}$/;
-
-        // ========== DOM HELPER FUNCTIONS ==========
-        function getEl(id) { return document.getElementById(id); }
-        function getVal(id) { const el = getEl(id); return el ? el.value.trim() : ''; }
-        function setVal(id, value) { const el = getEl(id); if (el) el.value = value || ''; }
-        
-        function toggleVisibility(id, show, useActiveClass = false) { 
-            const el = getEl(id); 
-            if (el) {
-                if (useActiveClass) {
-                    if (show) el.classList.add('active');
-                    else el.classList.remove('active');
-                } else {
-                    el.classList.toggle('hidden', !show);
-                }
-            }
-        }
-
-        function setChecked(id, checked) { const el = getEl(id); if (el) el.checked = checked; }
-        function isChecked(id) { const el = getEl(id); return el ? el.checked : false; }
-        function setHTML(id, html) { const el = getEl(id); if (el) el.innerHTML = html; }
-        function setText(id, text) { const el = getEl(id); if (el) el.textContent = text; }
-        function setDisabled(id, disabled) { const el = getEl(id); if (el) el.disabled = disabled; }
-        function setStyle(id, property, value) { const el = getEl(id); if (el) el.style[property] = value; }
-        function addClass(id, className) { const el = getEl(id); if (el) el.classList.add(className); }
-        function removeClass(id, className) { const el = getEl(id); if (el) el.classList.remove(className); }
-
-
         // ========== GLOBAL VARIABLES & CONFIG ==========
+       const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzNwn0hGabKr6mQUJLhHhK8zphOaxlkp8Z38bsG5eMTkQ3SolGv5l5gR3fGWu-L05r4/exec';
+
         const DB_NAME = "ReviveSubsDB", STORE_NAME = "appDataStore", DB_VERSION = 1, MAIN_DATA_KEY = "mainApplicationData";
         let data = { version: "2.9.7" }; // Version will be fully populated
 
@@ -1207,6 +1328,45 @@
         
         let globalSearchQuery = ""; // For global search
         const debouncedGlobalSearch = debounce(handleGlobalSearch, 300);
+
+        // Cloud Sync Variables
+        let lastCloudSyncTime = null;
+        let autoSaveToCloudEnabled = false;
+        let autoSaveIntervalId = null;
+
+
+        // ========== UTILITIES ==========
+        function debounce(func, delay) { let timeout; return function(...args) { const context = this; clearTimeout(timeout); timeout = setTimeout(() => func.apply(context, args), delay); }; }
+        function isValidUrl(string) { try { new URL(string); return true; } catch (_) { return false; } }
+        function isValidSocialHandle(handle, pattern) { return pattern.test(handle) || isValidUrl(handle); }
+        const twitterPattern = /^@?[a-zA-Z0-9_]{1,15}$/;
+        const telegramPattern = /^@?[a-zA-Z0-9_]{5,32}$/;
+
+        // ========== DOM HELPER FUNCTIONS ==========
+        function getEl(id) { return document.getElementById(id); }
+        function getVal(id) { const el = getEl(id); return el ? el.value.trim() : ''; }
+        function setVal(id, value) { const el = getEl(id); if (el) el.value = value || ''; }
+        
+        function toggleVisibility(id, show, useActiveClass = false) { 
+            const el = getEl(id); 
+            if (el) {
+                if (useActiveClass) {
+                    if (show) el.classList.add('active');
+                    else el.classList.remove('active');
+                } else {
+                    el.classList.toggle('hidden', !show);
+                }
+            }
+        }
+
+        function setChecked(id, checked) { const el = getEl(id); if (el) el.checked = checked; }
+        function isChecked(id) { const el = getEl(id); return el ? el.checked : false; }
+        function setHTML(id, html) { const el = getEl(id); if (el) el.innerHTML = html; }
+        function setText(id, text) { const el = getEl(id); if (el) el.textContent = text; }
+        function setDisabled(id, disabled) { const el = getEl(id); if (el) el.disabled = disabled; }
+        function setStyle(id, property, value) { const el = getEl(id); if (el) el.style[property] = value; }
+        function addClass(id, className) { const el = getEl(id); if (el) el.classList.add(className); }
+        function removeClass(id, className) { const el = getEl(id); if (el) el.classList.remove(className); }
 
 
         // ========== DATABASE (IndexedDB) ==========
@@ -1255,7 +1415,8 @@
                     headerLinkWebsiteUrl: "#", 
                     headerLinkDiscordUrl: "#", 
                     headerLinkTelegramUrl: "#", 
-                    headerLinkDriveUrl: "#" 
+                    headerLinkDriveUrl: "#",
+                    autoSaveToCloud: false // إضافة إعداد الحفظ التلقائي
                 },
                 members: [], anime: [], series: [], 
                 recentActivityLog: [] 
@@ -1290,12 +1451,28 @@
                 }
             });
             getEl('globalSaveBtn').addEventListener('click', manualSaveData);
-            // Event listeners for import/export dropdowns are handled by their `onclick` attributes.
+            
+            // Setup dropdown toggles
+            setupDropdown('globalImportBtnTrigger', 'importDropdown'); // Updated ID
+            setupDropdown('globalExportBtnTrigger', 'exportDropdown'); // Updated ID
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.dropdown-container')) {
+                    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                        menu.classList.add('hidden');
+                        menu.closest('.dropdown-container').classList.remove('active');
+                    });
+                }
+            });
         });
 
         async function initializeApp() {
             try { await loadData(); }
             catch (error) { console.error("Error during initial data load:", error); requestAnimationFrame(() => showAlert("حدث خطأ أثناء تحميل البيانات الأولية.", "danger")); data = initializeDefaultDataStructure(false); }
+            
+            initializeAutoSaveSetting(); // استعادة وإعداد الحفظ التلقائي للسحابة
+
             recalculateAllMemberData(); updateAllDisplays(); populateMemberReportDropdown();
             recalculateAllMemberData();
 
@@ -1308,15 +1485,13 @@
             updateAllDisplays(); populateMemberReportDropdown();
             window.addEventListener('beforeunload', (e) => {
                 if (unsavedChanges) {
-                    requestAnimationFrame(() => showAlert(
-                        'تنبيه: لديك تغييرات غير محفوظة. إغلاق الصفحة الآن قد يؤدي إلى فقدان هذه التغييرات.',
-                        'warning',
-                        7000 // Duration in ms
-                    ));
-                    const confirmationMessage = 'لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة وفقدان هذه التغييرات؟';
-                    e.preventDefault(); 
-                    e.returnValue = confirmationMessage; 
-                    return confirmationMessage; 
+                    // الحفظ التلقائي للسحابة عند الإغلاق (إذا مفعل) سيتم معالجته بدالة أخرى
+                    if (!autoSaveToCloudEnabled) { // فقط اعرض التحذير إذا لم يكن الحفظ التلقائي للسحابة مفعلًا
+                        const confirmationMessage = 'لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة وفقدان هذه التغييرات؟';
+                        e.preventDefault(); 
+                        e.returnValue = confirmationMessage; 
+                        return confirmationMessage; 
+                    }
                 }
             });
             showProjectSubView('animeProjectsView', document.querySelector('.sub-nav-tab[onclick*="animeProjectsView"]'));
@@ -2045,8 +2220,41 @@
             }
         }
 
-        // ========== DATA IMPORT/EXPORT & CLEAR (MODIFIED FOR CLOUD) ==========
-        // Note: exportAllData and importData are now defined at the end with cloud logic
+        // ========== DATA IMPORT/EXPORT & CLEAR (Local) ==========
+        function exportAllData() { downloadFile(JSON.stringify(data, null, 2), `ReviveSubs_FullBackup_${new Date().toISOString().split('T')[0]}.json`, 'application/json;charset=utf-8;'); logRecentActivity('تصدير جميع البيانات محلياً (JSON)'); requestAnimationFrame(() => showAlert('تم تصدير جميع البيانات محلياً بنجاح.', 'success')); }
+        function importData() { // Renamed from importData to avoid conflict if any
+            const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
+            input.onchange = async (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    const confirmed = await showConfirmDialog( // Use custom confirm
+                        'تأكيد الاستيراد المحلي',
+                        'سيؤدي استيراد البيانات المحلية إلى الكتابة فوق جميع البيانات الحالية. هل أنت متأكد؟',
+                        ['نعم، استورد', 'إلغاء']
+                    );
+                    if (confirmed !== 0) { // If "نعم، استورد" is not clicked
+                        showAlert('تم إلغاء عملية الاستيراد المحلي.', 'info');
+                        return;
+                    }
+
+                    const reader = new FileReader();
+                    reader.onload = async (e) => {
+                        try {
+                            const imported = JSON.parse(e.target.result);
+                            const defaultStructure = initializeDefaultDataStructure(false);
+                            if (imported && imported.settings && Array.isArray(imported.members) && Array.isArray(imported.anime) && Array.isArray(imported.series)) {
+                                data = { ...defaultStructure, ...imported }; data.settings = { ...defaultStructure.settings, ...(imported.settings || {}) };
+                                // data.members.forEach(m => { /* Manual episode field deletion removed as per request */ });
+                                if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = []; 
+                                await saveData(); unsavedChanges = false; logRecentActivity(`استيراد ملف محلي: ${file.name}`); requestAnimationFrame(() => showAlert('تم استيراد البيانات المحلية بنجاح.', 'success')); updateAllDisplays(); recalculateAllMemberData(); initializeAutoSaveSetting();
+                            } else requestAnimationFrame(() => showAlert('ملف الاستيراد المحلي غير صالح.', 'danger'));
+                        } catch (error) { console.error("Error importing local data:", error); requestAnimationFrame(() => showAlert('خطأ أثناء استيراد البيانات المحلية.', 'danger')); }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
         function downloadFile(content, filename, contentType) { const a = document.createElement('a'), file = new Blob([content],{type:contentType}); a.href=URL.createObjectURL(file); a.download=filename; a.click(); URL.revokeObjectURL(a.href); }
 
         // ========== EXTERNAL API FETCHING (MAL & TMDB) ==========
@@ -2393,207 +2601,384 @@
                 getEl('headerLinkDrive').href = data.settings.headerLinkDriveUrl || "#";
             });
         }
+        
+        // ========== CLOUD SYNC & RELATED UI ==========
 
-        // ========== GITHUB CLOUD SYNC FUNCTIONS ==========
-        // !!! هام: استبدل 'YOUR_GITHUB_TOKEN_HERE' بالتوكن الخاص بك من GitHub
-        // !!! تأكد أن التوكن يملك صلاحية "gist"
-        const GITHUB_TOKEN = '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'; // <--- استبدل هذا بالتوكن الصحيح
-        const GITHUB_USERNAME = '90sa90'; // اسم المستخدم الخاص بك على GitHub
-
-        function toggleDropdown(menuId) {
+        // Dropdown functionality
+        function setupDropdown(buttonId, menuId) {
+            const button = document.getElementById(buttonId);
             const menu = document.getElementById(menuId);
-            const isVisible = menu.style.display !== 'none';
             
-            document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
-            
-            if (!isVisible) {
-                menu.style.display = 'block';
-                setTimeout(() => {
-                    document.addEventListener('click', function hideMenuOnClickOutside(event) {
-                        const clickedButton = event.target.closest(`button[onclick*="${menuId}"]`);
-                        if (!menu.contains(event.target) && !clickedButton) {
-                            menu.style.display = 'none';
-                            document.removeEventListener('click', hideMenuOnClickOutside);
+            if (button && menu) {
+                button.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    document.querySelectorAll('.dropdown-menu').forEach(m => {
+                        if (m.id !== menuId) {
+                            m.classList.add('hidden');
+                            m.closest('.dropdown-container')?.classList.remove('active');
                         }
-                    }, { once: true });
-                }, 0);
+                    });
+                    
+                    menu.classList.toggle('hidden');
+                    button.closest('.dropdown-container')?.classList.toggle('active');
+                });
             }
         }
 
-        async function saveToCloud() {
-            try {
-                if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
-                    showAlert('لم يتم تكوين توكن GitHub للحفظ السحابي. يرجى تحديثه في السكربت.', 'danger', 5000); return;
-                }
-                showAlert('جاري الحفظ السحابي...', 'info', 2000);
-                
-                const gistsResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/gists`, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-                });
-                
-                if (gistsResponse.ok) {
-                    const gists = await gistsResponse.json();
-                    const appGists = gists.filter(g => g.description === 'ReviveSubs-Backup');
-                    appGists.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); 
+        // Cloud sync indicator
+        function showCloudSyncIndicator(message) {
+            let indicator = document.querySelector('.cloud-sync-indicator');
+            if (!indicator) {
+                indicator = document.createElement('div');
+                indicator.className = 'cloud-sync-indicator';
+                document.body.appendChild(indicator);
+            }
+            indicator.innerHTML = `
+                <div class="spinner"></div>
+                <p>${message}</p>
+            `;
+            indicator.classList.remove('hidden');
+            return indicator;
+        }
+        function hideCloudSyncIndicator() {
+            const indicator = document.querySelector('.cloud-sync-indicator');
+            if (indicator) {
+                indicator.classList.add('hidden');
+            }
+        }
 
-                    if (appGists.length >= 2) { 
-                        const oldestGist = appGists[0];
-                        await fetch(`https://api.github.com/gists/${oldestGist.id}`, {
-                            method: 'DELETE',
-                            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-                        });
-                         logRecentActivity(`تم حذف أقدم نسخة سحابية (${oldestGist.id}) للحفاظ على الحد الأقصى (2).`);
-                    }
-                } else {
-                    const errorData = await gistsResponse.json();
-                    console.error("Failed to fetch existing gists:", errorData.message || gistsResponse.status);
-                }
-                
-                const response = await fetch('https://api.github.com/gists', {
+
+        // Core Cloud Sync Functions (using Google Apps Script)
+        async function exportToCloud() {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL')) {
+                showAlert('يرجى تكوين رابط Google Apps Script أولاً في الكود.', 'warning');
+                return;
+            }
+            const indicator = showCloudSyncIndicator('جاري رفع البيانات إلى السحابة...');
+            try {
+                const dataToSave = { ...data, lastSaved: new Date().toISOString() };
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify({
-                        description: 'ReviveSubs-Backup',
-                        public: false,
-                        files: {
-                            'revivesubs_backup.json': { 
-                                content: JSON.stringify(data, null, 2)
-                            }
-                        }
-                    })
+                    body: JSON.stringify(dataToSave),
+                    headers: { 'Content-Type': 'application/json' },
+                    // Removed mode: 'no-cors' to read response
                 });
-                
-                if (response.ok) {
-                    const newGist = await response.json();
-                    showAlert('تم الحفظ السحابي بنجاح!', 'success');
-                    logRecentActivity(`تم حفظ نسخة احتياطية سحابية: ${newGist.id}`);
+                const result = await response.json();
+                hideCloudSyncIndicator();
+
+                if (result.success) {
+                    showAlert('تم رفع البيانات إلى السحابة بنجاح!', 'success');
+                    unsavedChanges = false;
+                    updateLastSyncTimeDisplay(new Date().toISOString(), true);
+                    logRecentActivity('تم رفع البيانات إلى السحابة بنجاح.');
+                    const statusEl = document.getElementById('cloudStatus');
+                    const statusTextEl = document.getElementById('cloudStatusText');
+                    if (statusEl) statusEl.className = 'cloud-status-indicator connected';
+                    if (statusTextEl) statusTextEl.textContent = 'متصل (تم الرفع)';
                 } else {
-                    const errorData = await response.json();
-                    console.error('GitHub API Error during save:', errorData);
-                    throw new Error(`فشل الحفظ السحابي: ${errorData.message || response.statusText || response.status}`);
+                    showAlert(`فشل رفع البيانات: ${result.error || result.message || 'خطأ غير معروف'}`, 'danger');
+                    logRecentActivity(`فشل رفع البيانات إلى السحابة: ${result.error || result.message}`);
+                    updateLastSyncTimeDisplay(new Date().toISOString(), false);
                 }
-                
             } catch (error) {
-                console.error('Cloud Save Error:', error);
-                showAlert('خطأ في الحفظ السحابي: ' + error.message, 'danger');
+                hideCloudSyncIndicator();
+                showAlert(`خطأ في الاتصال لرفع البيانات: ${error.toString()}`, 'danger');
+                console.error('Error exporting to cloud:', error);
+                logRecentActivity(`خطأ في الاتصال عند رفع البيانات: ${error.toString()}`);
+                updateLastSyncTimeDisplay(new Date().toISOString(), false);
             }
         }
 
-        async function loadFromCloud() {
+        async function importFromCloud() {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL')) {
+                showAlert('يرجى تكوين رابط Google Apps Script أولاً في الكود.', 'warning');
+                return;
+            }
+            const confirmedImport = await showConfirmDialog(
+                'تأكيد الاستيراد السحابي',
+                'سيتم استبدال البيانات المحلية الحالية بالبيانات الموجودة في السحابة. هل أنت متأكد من المتابعة؟',
+                ['نعم، استورد من السحابة', 'إلغاء']
+            );
+            if (confirmedImport !== 0) {
+                showAlert('تم إلغاء عملية الاستيراد السحابي.', 'info');
+                return;
+            }
+
+            const indicator = showCloudSyncIndicator('جاري تنزيل البيانات من السحابة...');
             try {
-                if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
-                     showAlert('لم يتم تكوين توكن GitHub للتحميل السحابي. يرجى تحديثه في السكربت.', 'danger', 5000); return;
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?cacheBust=' + new Date().getTime(), { method: 'GET' }); // Added cacheBust
+                const cloudDataObject = await response.json();
+                hideCloudSyncIndicator();
+
+                if (cloudDataObject.error && !cloudDataObject.success) {
+                    throw new Error(cloudDataObject.error);
                 }
-                showAlert('جاري التحميل من السحابة...', 'info', 2000);
-                
-                const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/gists`, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('GitHub API Error during Gist list fetch:', errorData);
-                    throw new Error(`فشل الاتصال بخدمة GitHub Gists: ${errorData.message || response.statusText || response.status}`);
-                }
-                
-                const gists = await response.json();
-                let appGists = gists.filter(g => g.description === 'ReviveSubs-Backup' && g.files['revivesubs_backup.json']);
-                
-                if (appGists.length === 0) {
-                    showAlert('لا توجد نسخ احتياطية سحابية متوافقة.', 'info');
+                if (cloudDataObject.message === 'لا توجد بيانات محفوظة بعد.') {
+                    showAlert('لا توجد بيانات محفوظة في السحابة بعد.', 'info');
+                    const statusEl = document.getElementById('cloudStatus');
+                    const statusTextEl = document.getElementById('cloudStatusText');
+                    if (statusEl) statusEl.className = 'cloud-status-indicator';
+                    if (statusTextEl) statusTextEl.textContent = 'السحابة فارغة';
                     return;
                 }
-                
-                appGists.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); 
-                const latestGist = appGists[0];
-                
-                const raw_url = latestGist.files['revivesubs_backup.json'].raw_url;
-                const gistFileResponse = await fetch(raw_url); // No auth needed for raw_url
 
-                if (!gistFileResponse.ok) throw new Error('فشل جلب محتوى النسخة الاحتياطية');
-                
-                const backupContent = await gistFileResponse.text();
-                
-                if (!backupContent) throw new Error('ملف النسخة الاحتياطية فارغ أو غير موجود');
-                
-                if (confirm(`هل تريد استيراد آخر نسخة سحابية (${new Date(latestGist.created_at).toLocaleString('ar-EG')})؟ سيتم الكتابة فوق البيانات الحالية.`)) {
-                    const importedData = JSON.parse(backupContent);
-                    
-                    const defaultStructure = initializeDefaultDataStructure(false);
-                    if (importedData && importedData.members && importedData.anime && importedData.series) { 
-                        data = { ...defaultStructure, ...importedData };
-                        data.settings = { ...defaultStructure.settings, ...(importedData.settings || {}) };
-                        if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
-                        
-                        await saveData(); 
-                        unsavedChanges = false;
-                        showAlert('تم الاستيراد من السحابة بنجاح!', 'success');
-                        updateAllDisplays();
-                        logRecentActivity(`تم استيراد نسخة احتياطية سحابية من: ${latestGist.id}`);
-                    } else {
-                        throw new Error('ملف النسخة الاحتياطية السحابية غير صالح.');
-                    }
+                let actualDataToImport = cloudDataObject.data || cloudDataObject;
+                if (actualDataToImport && actualDataToImport.settings && Array.isArray(actualDataToImport.members)) {
+                    data = { ...initializeDefaultDataStructure(false), ...actualDataToImport };
+                    await saveData();
+                    unsavedChanges = false;
+                    updateAllDisplays();
+                    recalculateAllMemberData();
+                    initializeAutoSaveSetting(); // Re-initialize auto-save state
+                    logRecentActivity('تم استيراد البيانات من السحابة بنجاح.');
+                    showAlert('تم استيراد البيانات من السحابة بنجاح!', 'success');
+                    updateLastSyncTimeDisplay(actualDataToImport.lastSavedByCloud || actualDataToImport.lastSaved || new Date().toISOString(), true);
+                     const statusEl = document.getElementById('cloudStatus');
+                    const statusTextEl = document.getElementById('cloudStatusText');
+                    if (statusEl) statusEl.className = 'cloud-status-indicator connected';
+                    if (statusTextEl) statusTextEl.textContent = 'متصل (تم التنزيل)';
+                } else {
+                    throw new Error('البيانات المستوردة غير صالحة أو لا تحتوي على الهيكل المتوقع.');
                 }
-                
             } catch (error) {
-                console.error('Cloud Load Error:', error);
-                showAlert('خطأ في التحميل السحابي: ' + error.message, 'danger');
+                hideCloudSyncIndicator();
+                showAlert(`فشل استيراد البيانات من السحابة: ${error.message}`, 'danger');
+                console.error('Error importing from cloud:', error);
+                logRecentActivity(`خطأ في الاتصال عند تنزيل البيانات: ${error.toString()}`);
+                 updateLastSyncTimeDisplay(new Date().toISOString(), false);
             }
         }
 
-        function exportAllData(type = 'local') { 
-            toggleDropdown('exportMenu'); // Close menu
-            if (type === 'cloud') {
-                saveToCloud();
-            } else {
-                downloadFile(JSON.stringify(data, null, 2), `ReviveSubs_Backup_${new Date().toISOString().split('T')[0]}.json`, 'application/json;charset=utf-8;');
-                logRecentActivity('تصدير البيانات محلياً');
-                showAlert('تم التصدير محلياً بنجاح.', 'success');
+        // Cloud Sync Settings UI Functions
+        async function testCloudConnection() {
+            if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes('YOUR_GOOGLE_APPS_SCRIPT_WEB_APP_URL')) {
+                showAlert('يرجى تكوين رابط Google Apps Script أولاً في الكود.', 'warning');
+                return;
             }
-        }
-
-        function importData(type = 'local') { 
-            toggleDropdown('importMenu'); // Close menu
-            if (type === 'cloud') {
-                loadFromCloud();
-            } else {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                input.onchange = async (event) => {
-                    const file = event.target.files[0];
-                    if (file && confirm('سيؤدي استيراد البيانات إلى الكتابة فوق جميع البيانات الحالية. هل أنت متأكد؟')) {
-                        const reader = new FileReader();
-                        reader.onload = async (e) => {
-                            try {
-                                const imported = JSON.parse(e.target.result);
-                                const defaultStructure = initializeDefaultDataStructure(false);
-                                if (imported && imported.settings && Array.isArray(imported.members) && Array.isArray(imported.anime) && Array.isArray(imported.series)) {
-                                    data = { ...defaultStructure, ...imported };
-                                    data.settings = { ...defaultStructure.settings, ...(imported.settings || {}) };
-                                    if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
-                                    await saveData();
-                                    unsavedChanges = false;
-                                    logRecentActivity(`استيراد ملف محلي: ${file.name}`);
-                                    showAlert('تم استيراد البيانات بنجاح.', 'success');
-                                    updateAllDisplays();
-                                } else {
-                                    showAlert('ملف الاستيراد غير صالح.', 'danger');
-                                }
-                            } catch (error) {
-                                console.error("Error importing data:", error);
-                                showAlert('خطأ أثناء استيراد البيانات.', 'danger');
-                            }
-                        };
-                        reader.readAsText(file);
+            const statusEl = document.getElementById('cloudStatus');
+            const statusTextEl = document.getElementById('cloudStatusText');
+            
+            statusEl.className = 'cloud-status-indicator syncing';
+            statusTextEl.textContent = 'جاري الاختبار...';
+            
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL + '?test=true&cacheBust=' + new Date().getTime()); // Added cacheBust
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        statusEl.className = 'cloud-status-indicator connected';
+                        statusTextEl.textContent = 'متصل';
+                        showAlert('الاتصال بالسحابة يعمل بشكل صحيح!', 'success');
+                    } else {
+                         throw new Error(result.message || 'فشل اختبار الاتصال من الخادم');
                     }
-                };
-                input.click();
+                } else {
+                    throw new Error(`فشل الاتصال بالخادم: ${response.status}`);
+                }
+            } catch (error) {
+                statusEl.className = 'cloud-status-indicator error';
+                statusTextEl.textContent = 'غير متصل';
+                showAlert(`فشل الاتصال بالسحابة: ${error.message}`, 'danger');
+                console.error("Test connection error:", error);
             }
+        }
+
+        async function syncWithCloud() {
+            const choice = await showConfirmDialog(
+                'مزامنة البيانات السحابية',
+                'هل تريد رفع البيانات الحالية إلى السحابة أم تنزيل أحدث نسخة من السحابة؟',
+                ['<i class="fas fa-cloud-upload-alt"></i> رفع إلى السحابة', '<i class="fas fa-cloud-download-alt"></i> تنزيل من السحابة', 'إلغاء']
+            );
+            
+            if (choice === 0) { // رفع
+                await exportToCloud();
+            } else if (choice === 1) { // تنزيل
+                await importFromCloud();
+            }
+            // إذا كان choice === 2 (إلغاء)، لا تفعل شيئًا
+        }
+
+        function updateLastSyncTimeDisplay(syncTimeISO, success = true) {
+            if (syncTimeISO) lastCloudSyncTime = new Date(syncTimeISO);
+            else if (success) lastCloudSyncTime = new Date(); // إذا لم يتم توفير وقت ولكن العملية ناجحة
+
+            const lastSyncEl = document.getElementById('lastCloudSync');
+            if (lastSyncEl) {
+                if (success && lastCloudSyncTime) {
+                    lastSyncEl.innerHTML = `
+                        <i class="fas fa-check-circle" style="color: var(--accent-green);"></i>
+                        ${formatDateTime(lastCloudSyncTime.toISOString())}
+                    `;
+                } else if (!success) {
+                     lastSyncEl.innerHTML = `
+                        <i class="fas fa-times-circle" style="color: var(--accent-red);"></i>
+                        فشل آخر محاولة مزامنة في ${formatDateTime(new Date().toISOString())}
+                    `;
+                } else {
+                    lastSyncEl.textContent = 'لم تتم المزامنة بعد أو لم يتم تحميلها من السحابة.';
+                }
+            }
+        }
+        
+        // Custom Confirm Dialog (ensure this is defined once)
+        function showConfirmDialog(title, message, buttons) {
+            return new Promise((resolve) => {
+                const existingModal = document.querySelector('.custom-confirm-modal');
+                if (existingModal) existingModal.remove(); // Remove if one already exists
+
+                const modal = document.createElement('div');
+                modal.className = 'modal custom-confirm-modal'; // Add a specific class
+                modal.style.display = 'block';
+                
+                let modalContentHtml = `
+                    <div class="modal-content" style="max-width: 500px;">
+                        <div class="modal-header">
+                            <h2>${title}</h2>
+                            <span class="close">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <p>${message}</p>
+                        </div>
+                        <div class="modal-footer" style="justify-content: center;"> 
+                `; // Centered footer buttons
+
+                buttons.forEach((btnText, index) => {
+                    let btnClass = 'btn-secondary';
+                    if (index === 0) btnClass = 'btn-primary';
+                    else if (index === 1 && buttons.length > 2) btnClass = 'btn-info';
+                    
+                    modalContentHtml += `
+                        <button class="btn ${btnClass} confirm-btn" data-index="${index}">
+                            ${btnText}
+                        </button>
+                    `;
+                });
+                modalContentHtml += `</div></div>`;
+                modal.innerHTML = modalContentHtml;
+                
+                document.body.appendChild(modal);
+
+                const closeModalAndResolve = (result) => {
+                    modal.remove();
+                    resolve(result);
+                };
+
+                modal.querySelector('.close').onclick = () => closeModalAndResolve(-1); // -1 for close/cancel by X
+                
+                modal.querySelectorAll('.confirm-btn').forEach(button => {
+                    button.onclick = () => closeModalAndResolve(parseInt(button.dataset.index));
+                });
+            });
+        }
+
+
+        // Auto-save to cloud
+        function toggleAutoSaveToCloud() {
+            autoSaveToCloudEnabled = document.getElementById('autoSaveToCloud').checked;
+            if (autoSaveToCloudEnabled) {
+                if (autoSaveIntervalId) clearInterval(autoSaveIntervalId); // Clear existing interval if any
+                autoSaveIntervalId = setInterval(async () => {
+                    if (unsavedChanges) { 
+                        console.log("Auto-saving to cloud due to interval...");
+                        await exportToCloud(); 
+                    } else {
+                        console.log("Auto-save interval: No unsaved changes to save.");
+                    }
+                }, 5 * 60 * 1000); // 5 minutes
+                showAlert('تم تفعيل الحفظ التلقائي إلى السحابة (كل 5 دقائق).', 'info');
+                logRecentActivity('تم تفعيل الحفظ التلقائي للسحابة.');
+            } else {
+                if (autoSaveIntervalId) clearInterval(autoSaveIntervalId);
+                autoSaveIntervalId = null;
+                showAlert('تم إلغاء تفعيل الحفظ التلقائي للسحابة.', 'info');
+                logRecentActivity('تم إلغاء تفعيل الحفظ التلقائي للسحابة.');
+            }
+            if (data.settings) data.settings.autoSaveToCloud = autoSaveToCloudEnabled;
+            else data.settings = { autoSaveToCloud: autoSaveToCloudEnabled };
+            saveData();
+        }
+
+        function initializeAutoSaveSetting() {
+            if (data.settings && data.settings.autoSaveToCloud !== undefined) {
+                autoSaveToCloudEnabled = data.settings.autoSaveToCloud;
+                const checkbox = document.getElementById('autoSaveToCloud');
+                if (checkbox) checkbox.checked = autoSaveToCloudEnabled;
+                
+                if (autoSaveToCloudEnabled) {
+                    if (autoSaveIntervalId) clearInterval(autoSaveIntervalId);
+                    autoSaveIntervalId = setInterval(async () => {
+                        if (unsavedChanges) {
+                            console.log("Auto-saving to cloud due to interval (restored)...");
+                            await exportToCloud();
+                        } else {
+                            console.log("Auto-save interval (restored): No unsaved changes to save.");
+                        }
+                    }, 5 * 60 * 1000);
+                }
+            }
+             // Update last sync time display based on data loaded (assuming it might come from cloud)
+            if (data.lastSavedByCloud) { // Assuming Apps Script adds this field on GET
+                updateLastSyncTimeDisplay(data.lastSavedByCloud, true);
+            } else if (data.lastSaved && document.getElementById('lastCloudSync')) {
+                 // If no specific cloud save time, but local data has a save time, indicate it's not from cloud
+                 // getEl('lastCloudSync').textContent = 'آخر حفظ محلي: ' + formatDateTime(data.lastSaved);
+            }
+        }
+        
+// Beforeunload handler for auto-saving if enabled
+window.addEventListener('beforeunload', async (e) => {
+    if (unsavedChanges && autoSaveToCloudEnabled) {
+        console.log("Attempting auto-save to cloud on beforeunload...");
+        // Use navigator.sendBeacon if available for more reliable background sending
+        if (navigator.sendBeacon) {
+            const dataToSave = { ...data, lastSaved: new Date().toISOString() };
+            // أضف Content-Type header للـ beacon
+            const blob = new Blob([JSON.stringify(dataToSave)], {type: 'application/json'}); // هذا السطر مهم وصحيح
+            const success = navigator.sendBeacon(GOOGLE_SCRIPT_URL, blob); // <--- تم تعديل هذا السطر
+            console.log(success ? "Beacon sent successfully" : "Beacon failed to send"); // <--- تم تعديل هذا السطر
+        } else {
+            // Fallback to fetch with keepalive
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify({ ...data, lastSaved: new Date().toISOString() }),
+                headers: { 'Content-Type': 'application/json' },
+                keepalive: true
+            }).then(response => response.json())
+              .then(result => {
+                  if (result.success) console.log("Auto-save successful on beforeunload (fetch).");
+                  else console.error("Auto-save failed on beforeunload (fetch):", result.error);
+              }).catch(err => console.error("Auto-save network error on beforeunload (fetch):", err));
+        }
+        // Do not prevent default, let the page close. The request should continue.
+    } else if (unsavedChanges && !autoSaveToCloudEnabled) {
+         // Standard unsaved changes warning if cloud auto-save is off
+        const confirmationMessage = 'لديك تغييرات غير محفوظة. هل أنت متأكد أنك تريد المغادرة وفقدان هذه التغييرات؟';
+        e.preventDefault(); 
+        e.returnValue = confirmationMessage; 
+        return confirmationMessage; 
+    }
+});
+
+        // Function to show cloud sync history
+        function showCloudHistory() {
+            let cloudLogs = (data.recentActivityLog || [])
+                .filter(log => log.message.toLowerCase().includes('سحابة') || log.message.toLowerCase().includes('cloud'))
+                .map(log => `<li>${log.message} - ${formatDateTime(log.timestamp)}</li>`)
+                .join('');
+
+            if (!cloudLogs) {
+                cloudLogs = '<li>لا توجد أنشطة مزامنة مسجلة.</li>';
+            }
+
+            // Use existing showConfirmDialog for structure or create a new simple modal
+            showConfirmDialog(
+                'سجل المزامنة السحابية',
+                `<ul style="list-style: none; padding: 0; text-align: right; max-height: 50vh; overflow-y: auto;">${cloudLogs}</ul>`,
+                ['إغلاق']
+            ).then(choice => {
+                // No action needed on close for this specific dialog
+            });
         }
 
     </script>
