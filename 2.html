@@ -920,7 +920,6 @@
         <button id="globalSearchToggleBtn" class="btn-icon" title="بحث عام"><i class="fas fa-search"></i></button>
         <button id="globalSaveBtn" class="btn-icon" title="حفظ البيانات"><i class="fas fa-save"></i></button>
         
-        <!-- أزرار الاستيراد/التصدير الجديدة -->
         <div style="position:relative; display:inline-block;">
             <button class="btn-icon" onclick="toggleDropdown('importMenu')" title="استيراد"><i class="fas fa-file-import"></i></button>
             <div id="importMenu" class="dropdown-menu" style="display:none;">
@@ -2396,8 +2395,10 @@
         }
 
         // ========== GITHUB CLOUD SYNC FUNCTIONS ==========
-        const GITHUB_TOKEN = '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'; // User Provided Token
-        const GITHUB_USERNAME = '90sa90'; // User Provided Username
+        // !!! هام: استبدل 'YOUR_GITHUB_TOKEN_HERE' بالتوكن الخاص بك من GitHub
+        // !!! تأكد أن التوكن يملك صلاحية "gist"
+        const GITHUB_TOKEN = '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'; // <--- استبدل هذا بالتوكن الصحيح
+        const GITHUB_USERNAME = '90sa90'; // اسم المستخدم الخاص بك على GitHub
 
         function toggleDropdown(menuId) {
             const menu = document.getElementById(menuId);
@@ -2407,14 +2408,14 @@
             
             if (!isVisible) {
                 menu.style.display = 'block';
-                setTimeout(() => { // Add listener after current event loop to prevent immediate self-closing
+                setTimeout(() => {
                     document.addEventListener('click', function hideMenuOnClickOutside(event) {
                         const clickedButton = event.target.closest(`button[onclick*="${menuId}"]`);
                         if (!menu.contains(event.target) && !clickedButton) {
                             menu.style.display = 'none';
                             document.removeEventListener('click', hideMenuOnClickOutside);
                         }
-                    }, { once: true }); // Use once to auto-remove after one execution
+                    }, { once: true });
                 }, 0);
             }
         }
@@ -2422,7 +2423,7 @@
         async function saveToCloud() {
             try {
                 if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
-                    showAlert('لم يتم تكوين توكن GitHub للحفظ السحابي.', 'danger'); return;
+                    showAlert('لم يتم تكوين توكن GitHub للحفظ السحابي. يرجى تحديثه في السكربت.', 'danger', 5000); return;
                 }
                 showAlert('جاري الحفظ السحابي...', 'info', 2000);
                 
@@ -2433,9 +2434,8 @@
                 if (gistsResponse.ok) {
                     const gists = await gistsResponse.json();
                     const appGists = gists.filter(g => g.description === 'ReviveSubs-Backup');
-                    appGists.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // Sort oldest first
+                    appGists.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); 
 
-                    // Ensure we keep at most 2 backups. If we have 2 or more, delete oldest to make space.
                     if (appGists.length >= 2) { 
                         const oldestGist = appGists[0];
                         await fetch(`https://api.github.com/gists/${oldestGist.id}`, {
@@ -2445,7 +2445,8 @@
                          logRecentActivity(`تم حذف أقدم نسخة سحابية (${oldestGist.id}) للحفاظ على الحد الأقصى (2).`);
                     }
                 } else {
-                    console.warn("فشل في جلب قائمة النسخ الاحتياطية الحالية، سيتم إنشاء نسخة جديدة على أي حال.");
+                    const errorData = await gistsResponse.json();
+                    console.error("Failed to fetch existing gists:", errorData.message || gistsResponse.status);
                 }
                 
                 const response = await fetch('https://api.github.com/gists', {
@@ -2459,7 +2460,7 @@
                         description: 'ReviveSubs-Backup',
                         public: false,
                         files: {
-                            'revivesubs_backup.json': { // Filename in Gist
+                            'revivesubs_backup.json': { 
                                 content: JSON.stringify(data, null, 2)
                             }
                         }
@@ -2472,8 +2473,8 @@
                     logRecentActivity(`تم حفظ نسخة احتياطية سحابية: ${newGist.id}`);
                 } else {
                     const errorData = await response.json();
-                    console.error('GitHub API Error:', errorData);
-                    throw new Error(`فشل الحفظ السحابي: ${errorData.message || response.status}`);
+                    console.error('GitHub API Error during save:', errorData);
+                    throw new Error(`فشل الحفظ السحابي: ${errorData.message || response.statusText || response.status}`);
                 }
                 
             } catch (error) {
@@ -2485,7 +2486,7 @@
         async function loadFromCloud() {
             try {
                 if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
-                    showAlert('لم يتم تكوين توكن GitHub للتحميل السحابي.', 'danger'); return;
+                     showAlert('لم يتم تكوين توكن GitHub للتحميل السحابي. يرجى تحديثه في السكربت.', 'danger', 5000); return;
                 }
                 showAlert('جاري التحميل من السحابة...', 'info', 2000);
                 
@@ -2493,7 +2494,11 @@
                     headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
                 
-                if (!response.ok) throw new Error('فشل الاتصال بخدمة GitHub Gists');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('GitHub API Error during Gist list fetch:', errorData);
+                    throw new Error(`فشل الاتصال بخدمة GitHub Gists: ${errorData.message || response.statusText || response.status}`);
+                }
                 
                 const gists = await response.json();
                 let appGists = gists.filter(g => g.description === 'ReviveSubs-Backup' && g.files['revivesubs_backup.json']);
@@ -2503,12 +2508,11 @@
                     return;
                 }
                 
-                appGists.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort newest first
+                appGists.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); 
                 const latestGist = appGists[0];
                 
-                // Gist content is in files[filename].raw_url or need to fetch the gist itself for content
                 const raw_url = latestGist.files['revivesubs_backup.json'].raw_url;
-                const gistFileResponse = await fetch(raw_url);
+                const gistFileResponse = await fetch(raw_url); // No auth needed for raw_url
 
                 if (!gistFileResponse.ok) throw new Error('فشل جلب محتوى النسخة الاحتياطية');
                 
@@ -2520,12 +2524,12 @@
                     const importedData = JSON.parse(backupContent);
                     
                     const defaultStructure = initializeDefaultDataStructure(false);
-                    if (importedData && importedData.members && importedData.anime && importedData.series) { // Basic validation
+                    if (importedData && importedData.members && importedData.anime && importedData.series) { 
                         data = { ...defaultStructure, ...importedData };
                         data.settings = { ...defaultStructure.settings, ...(importedData.settings || {}) };
                         if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
                         
-                        await saveData(); // Save to IndexedDB
+                        await saveData(); 
                         unsavedChanges = false;
                         showAlert('تم الاستيراد من السحابة بنجاح!', 'success');
                         updateAllDisplays();
@@ -2541,7 +2545,8 @@
             }
         }
 
-        function exportAllData(type = 'local') { // Modified
+        function exportAllData(type = 'local') { 
+            toggleDropdown('exportMenu'); // Close menu
             if (type === 'cloud') {
                 saveToCloud();
             } else {
@@ -2551,7 +2556,8 @@
             }
         }
 
-        function importData(type = 'local') { // Modified
+        function importData(type = 'local') { 
+            toggleDropdown('importMenu'); // Close menu
             if (type === 'cloud') {
                 loadFromCloud();
             } else {
