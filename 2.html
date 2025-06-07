@@ -6,8 +6,6 @@
     <title>ReviveSubs - نظام إدارة فريق الترجمة</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
-    <script src="https://apis.google.com/js/api.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
     <style>
         * {
             margin: 0;
@@ -316,81 +314,6 @@
             margin-left: 5px; /* For RTL, search input to the left of search button */
         }
 
-        /* Dropdown Styles */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: var(--bg-card-user);
-            min-width: 200px;
-            box-shadow: var(--shadow-lg);
-            border-radius: 8px;
-            z-index: 1000; /* Ensure it's above other elements in the toolbar */
-            border: 1px solid var(--border-color);
-            bottom: 100%; /* Position above the button */
-            right: 0; /* Align to the right of the button */
-            margin-bottom: 5px; /* Space between button and dropdown */
-        }
-
-        .dropdown-content.show {
-            display: block;
-        }
-
-        .dropdown-item {
-            color: var(--text-main);
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            cursor: pointer;
-            border-radius: 8px; /* Apply to items if not wrapping in another rounded container */
-            margin: 4px; /* Optional: space around items if dropdown-content itself isn't padded */
-            transition: background-color 0.2s ease;
-        }
-
-        .dropdown-item:hover {
-            background-color: var(--bg-hover-user);
-        }
-
-        .dropdown-item i {
-            margin-left: 8px; /* RTL: icon to the right of text */
-            width: 16px;      /* Ensure icons align */
-            text-align: center;
-        }
-
-        /* Cloud status indicator */
-        .cloud-status {
-            position: fixed;
-            top: 20px;
-            left: 20px; /* RTL will place it top-left */
-            background-color: var(--bg-card-user);
-            padding: 8px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            border: 1px solid var(--border-color);
-            z-index: 1000; /* High z-index */
-            display: none; /* Hidden by default */
-            color: var(--text-main);
-            align-items: center;
-            gap: 5px;
-        }
-        .cloud-status i {
-            font-size: 1.1em;
-        }
-
-        .cloud-status.connected {
-            color: var(--accent-green);
-            border-color: var(--accent-green);
-        }
-
-        .cloud-status.disconnected {
-            color: var(--accent-red);
-            border-color: var(--accent-red);
-        }
-
 
         @media (max-width: 768px) {
             .header-social-links { display: none; } 
@@ -409,11 +332,6 @@
                 bottom: 10px; left: 10px; right: 10px; width: auto;
             }
             .global-actions-container .search-box { width: calc(100% - 50px); margin-left: 0; margin-right: 5px;}
-            .dropdown-content { /* Adjust dropdown for mobile */
-                right: auto;
-                left: 0;
-                min-width: 180px;
-            }
         }
 
         .cards-grid, .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, calc(100% - 20px)), 1fr)); gap: 24px; margin-top: 20px; padding: 0; box-sizing: border-box; }
@@ -692,7 +610,7 @@
 
         #reportContent { background: rgba(36, 36, 36, 0.6); border: 1px solid rgba(139, 92, 246, 0.2); backdrop-filter: blur(10px); }
         @media print {
-            .header, .nav-tabs, .footer, .alert, .modal, .toolbar, .global-actions-container, .cloud-status,
+            .header, .nav-tabs, .footer, .alert, .modal, .toolbar, .global-actions-container,
             #settings > h2, 
             .settings-section:not(:has(#reportContent)), 
             .settings-section:has(#reportContent) > h3.section-title, 
@@ -732,6 +650,34 @@
             .money-positive { color: #008000 !important; }
             .money-zero { color: #f59e0b !important; }
             .money-negative { color: #cc0000 !important; }
+        }
+
+        /* Dropdown Menu for Import/Export */
+        .dropdown-menu {
+            position: absolute;
+            bottom: 100%; /* Appears above the button */
+            right: 0; /* Aligns to the right edge of the parent div */
+            background: var(--bg-secondary-user);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-width: 80px;
+            z-index: 1600; /* Higher than global actions container */
+            box-shadow: var(--shadow-md);
+            margin-bottom: 5px; /* Space between button and menu */
+        }
+
+        .dropdown-menu a {
+            display: block;
+            padding: 8px 12px;
+            color: var(--text-main);
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.85em;
+            text-align: center;
+        }
+
+        .dropdown-menu a:hover {
+            background: var(--bg-hover-user);
         }
     </style>
 </head>
@@ -968,43 +914,26 @@
         <footer class="footer"> <div class="brand">ReviveSubs</div> <p>جميع البيانات محفوظة محلياً في المتصفح (IndexedDB)</p> </footer>
     </div>
 
-    <!-- Cloud Status Indicator -->
-    <div class="cloud-status" id="cloudStatus">
-        <i class="fas fa-cloud"></i>
-        <span id="cloudStatusText">غير متصل</span>
-    </div>
-
     <!-- Global Actions Toolbar -->
     <div class="global-actions-container">
         <input type="text" id="globalSearchInput" class="search-box hidden" placeholder="بحث عام..." onkeyup="debouncedGlobalSearch()">
         <button id="globalSearchToggleBtn" class="btn-icon" title="بحث عام"><i class="fas fa-search"></i></button>
         <button id="globalSaveBtn" class="btn-icon" title="حفظ البيانات"><i class="fas fa-save"></i></button>
         
-        <div class="dropdown">
-            <button id="globalImportBtn" class="btn-icon dropdown-toggle" title="استيراد البيانات">
-                <i class="fas fa-file-import"></i>
-            </button>
-            <div class="dropdown-content" id="importDropdown">
-                <a href="#" class="dropdown-item" onclick="importData('local')">
-                    <i class="fas fa-file"></i>استيراد محلي
-                </a>
-                <a href="#" class="dropdown-item" onclick="importData('cloud')">
-                    <i class="fab fa-google-drive"></i>استيراد سحابي
-                </a>
+        <!-- أزرار الاستيراد/التصدير الجديدة -->
+        <div style="position:relative; display:inline-block;">
+            <button class="btn-icon" onclick="toggleDropdown('importMenu')" title="استيراد"><i class="fas fa-file-import"></i></button>
+            <div id="importMenu" class="dropdown-menu" style="display:none;">
+                <a onclick="importData('local')">محلي</a>
+                <a onclick="importData('cloud')">سحابي</a>
             </div>
         </div>
-
-        <div class="dropdown">
-            <button id="globalExportBtn" class="btn-icon dropdown-toggle" title="تصدير البيانات">
-                <i class="fas fa-file-export"></i>
-            </button>
-            <div class="dropdown-content" id="exportDropdown">
-                <a href="#" class="dropdown-item" onclick="exportAllData('local')">
-                    <i class="fas fa-file"></i>تصدير محلي
-                </a>
-                <a href="#" class="dropdown-item" onclick="exportAllData('cloud')">
-                    <i class="fab fa-google-drive"></i>تصدير سحابي
-                </a>
+        
+        <div style="position:relative; display:inline-block;">
+            <button class="btn-icon" onclick="toggleDropdown('exportMenu')" title="تصدير"><i class="fas fa-file-export"></i></button>
+            <div id="exportMenu" class="dropdown-menu" style="display:none;">
+                <a onclick="exportAllData('local')">محلي</a>
+                <a onclick="exportAllData('cloud')">سحابي</a>
             </div>
         </div>
     </div>
@@ -1139,23 +1068,6 @@
              <div class="modal-footer"> <button type="button" class="btn btn-secondary" onclick="closeModal('projectDetailsModal')">إغلاق</button> </div>
         </div>
     </div>
-
-    <div id="backupSelectionModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>اختيار نسخة احتياطية</h2>
-                <span class="close" onclick="closeModal('backupSelectionModal')">×</span>
-            </div>
-            <div class="modal-body">
-                <p>اختر النسخة الاحتياطية التي تريد استيرادها:</p>
-                <div id="backupsList"></div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" onclick="closeModal('backupSelectionModal')">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
 
     <template id="memberCardTemplate">
         <article class="member-card card"> <div class="card-header member-card-header"> <img src="" class="member-avatar" alt="Avatar" onerror="this.src='https://placehold.co/60x60/718096/e5e7eb?text=X'; this.onerror=null;">
@@ -1297,17 +1209,6 @@
         let globalSearchQuery = ""; // For global search
         const debouncedGlobalSearch = debounce(handleGlobalSearch, 300);
 
-        // Google Drive API Variables
-        const GOOGLE_CLIENT_ID = '365561915299-to68jo8cnvhvk6is9hgqu0si54n46nub.apps.googleusercontent.com';
-        const DISCOVERY_DOC = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';
-        const SCOPES = 'https://www.googleapis.com/auth/drive.file';
-        const BACKUP_FOLDER_NAME = 'ReviveSubs_Backups';
-
-        let gapiInstance; // Renamed to avoid conflict with global gapi from script
-        let googleIdentityServicesClient; // Renamed
-        let isGoogleApiInitialized = false;
-        let isSignedIn = false;
-
 
         // ========== DATABASE (IndexedDB) ==========
         function openDB() {
@@ -1383,65 +1284,15 @@
         // ========== CORE APP LOGIC & UI ROUTING ==========
         document.addEventListener('DOMContentLoaded', async function() {
             initializeApp();
-            
-            // Global Search
             getEl('globalSearchToggleBtn').addEventListener('click', () => {
                 getEl('globalSearchInput').classList.toggle('hidden');
                 if (!getEl('globalSearchInput').classList.contains('hidden')) {
                     getEl('globalSearchInput').focus();
                 }
             });
-            
-            // Manual Save
             getEl('globalSaveBtn').addEventListener('click', manualSaveData);
-
-            // Dropdown Toggles
-            getEl('globalImportBtn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleDropdown('importDropdown');
-            });
-            
-            getEl('globalExportBtn').addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleDropdown('exportDropdown');
-            });
-            
-            // Close dropdowns on outside click
-            document.addEventListener('click', (e) => {
-                if (!e.target.closest('.dropdown')) {
-                    document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                        dropdown.classList.remove('show');
-                    });
-                }
-            });
-            
-            // Initialize Google API
-             if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-                await initializeGoogleApi();
-            } else {
-                console.warn("Google API scripts not loaded yet. Cloud features might be delayed.");
-                // Poll or wait for scripts to load if necessary, or rely on user re-click
-                 window.onload = async () => { // Fallback if scripts load later
-                    if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-                        await initializeGoogleApi();
-                    } else {
-                        console.error("Google API scripts failed to load.");
-                        updateCloudStatus(false); // Explicitly set to disconnected
-                         showAlert("فشل تحميل واجهة Google API. الميزات السحابية غير متوفرة.", "danger");
-                    }
-                };
-            }
+            // Event listeners for import/export dropdowns are handled by their `onclick` attributes.
         });
-        
-        function toggleDropdown(dropdownId) {
-            document.querySelectorAll('.dropdown-content').forEach(dropdown => {
-                if (dropdown.id !== dropdownId) {
-                    dropdown.classList.remove('show');
-                }
-            });
-            getEl(dropdownId).classList.toggle('show');
-        }
-
 
         async function initializeApp() {
             try { await loadData(); }
@@ -2195,403 +2046,8 @@
             }
         }
 
-        // ========== GOOGLE DRIVE API FUNCTIONS ==========
-        async function initializeGoogleApi() {
-            try {
-                // Ensure gapi is loaded (from script tag)
-                await new Promise((resolve, reject) => {
-                    if (typeof gapi !== 'undefined') {
-                        gapi.load('client', {callback: resolve, onerror: reject });
-                    } else {
-                        reject(new Error("gapi not loaded"));
-                    }
-                });
-                
-                await gapi.client.init({
-                    discoveryDocs: [DISCOVERY_DOC],
-                });
-
-                // Ensure google.accounts.oauth2 is loaded
-                if (typeof google === 'undefined' || typeof google.accounts === 'undefined' || typeof google.accounts.oauth2 === 'undefined') {
-                    throw new Error("Google Identity Services (GIS) client not loaded.");
-                }
-                
-                googleIdentityServicesClient = google.accounts.oauth2.initTokenClient({
-                    client_id: GOOGLE_CLIENT_ID,
-                    scope: SCOPES,
-                    callback: (response) => { // This is the token response callback
-                        if (response.error !== undefined) {
-                            console.error('Error getting token:', response);
-                            updateCloudStatus(false);
-                            if(response.error === "popup_closed_by_user") {
-                                showAlert('تم إلغاء تسجيل الدخول إلى Google.', 'warning');
-                            } else if (response.error === "access_denied") {
-                                showAlert('تم رفض الوصول إلى Google Drive.', 'warning');
-                            } else {
-                                showAlert('خطأ في الاتصال بـ Google Drive.', 'danger');
-                            }
-                            return;
-                        }
-                        isSignedIn = true;
-                        updateCloudStatus(true);
-                        showAlert('تم الاتصال بـ Google Drive بنجاح!', 'success');
-                        // If an action was pending, it might need to be re-triggered by the user
-                        // or handled via a promise/callback mechanism if a more seamless UX is desired.
-                    },
-                });
-
-                isGoogleApiInitialized = true;
-                console.log('Google API initialized successfully');
-                // Attempt a silent sign-in if a previous session exists
-                if (gapi.client.getToken() === null) { // Check if already has token
-                    // No, so no auto sign-in for now. User must initiate.
-                } else {
-                     isSignedIn = true;
-                     updateCloudStatus(true);
-                }
-
-            } catch (error) {
-                console.error('Error initializing Google API:', error);
-                updateCloudStatus(false);
-                showAlert(`فشل تهيئة Google API: ${error.message}`, 'danger');
-            }
-        }
-
-        function updateCloudStatus(connected) {
-            const statusElement = getEl('cloudStatus');
-            const statusText = getEl('cloudStatusText');
-            
-            if (statusElement && statusText) {
-                if (connected) {
-                    statusElement.className = 'cloud-status connected';
-                    statusText.textContent = 'متصل بـ Google Drive';
-                } else {
-                    statusElement.className = 'cloud-status disconnected';
-                    statusText.textContent = 'غير متصل';
-                }
-                statusElement.style.display = 'flex'; // Use flex for alignment
-                
-                // Hide after a delay only if disconnected, or always show if connected
-                if (!connected) {
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 3000);
-                }
-            }
-        }
-
-        async function signInToGoogle() {
-            if (!isGoogleApiInitialized) {
-                showAlert('واجهة Google API لم تهيأ بعد. يرجى المحاولة مرة أخرى قريباً.', 'warning');
-                // Attempt to initialize if it failed or was delayed
-                if (typeof gapi !== 'undefined' && typeof google !== 'undefined') {
-                   await initializeGoogleApi();
-                } else {
-                    return false; // Indicate failure to initiate sign-in
-                }
-            }
-            
-            // Check again after potential re-initialization
-            if (!isGoogleApiInitialized || !googleIdentityServicesClient) {
-                 showAlert('فشل تهيئة نظام المصادقة مع Google.', 'danger');
-                 return false;
-            }
-
-            return new Promise((resolve) => {
-                googleIdentityServicesClient.requestAccessToken({ prompt: 'consent', callback: (tokenResponse) => {
-                    if (tokenResponse && !tokenResponse.error) {
-                        isSignedIn = true;
-                        updateCloudStatus(true);
-                        resolve(true);
-                    } else {
-                        isSignedIn = false;
-                        updateCloudStatus(false);
-                        console.error("Sign-in error or token retrieval failed:", tokenResponse ? tokenResponse.error : "No token response");
-                        showAlert(tokenResponse && tokenResponse.error === "popup_closed_by_user" ? "تم إلغاء عملية تسجيل الدخول." : "فشل تسجيل الدخول إلى Google Drive.", "warning");
-                        resolve(false);
-                    }
-                }});
-            });
-        }
-
-
-        async function createBackupFolder() {
-            try {
-                const response = await gapi.client.drive.files.list({
-                    q: `name='${BACKUP_FOLDER_NAME}' and mimeType='application/vnd.google-apps.folder' and trashed=false`,
-                    fields: 'files(id, name)'
-                });
-
-                if (response.result.files && response.result.files.length > 0) {
-                    return response.result.files[0].id;
-                }
-
-                const folderResponse = await gapi.client.drive.files.create({
-                    resource: {
-                        name: BACKUP_FOLDER_NAME,
-                        mimeType: 'application/vnd.google-apps.folder'
-                    },
-                    fields: 'id'
-                });
-                return folderResponse.result.id;
-            } catch (error) {
-                console.error('Error creating/finding backup folder:', error);
-                throw new Error(`Folder operation failed: ${error.message || error.details || error}`);
-            }
-        }
-
-        async function uploadBackupToGoogleDrive(jsonData) {
-            try {
-                const folderId = await createBackupFolder();
-                const fileName = `ReviveSubs_Backup_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
-                
-                const fileMetadata = {
-                    name: fileName,
-                    parents: [folderId]
-                };
-
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(fileMetadata)], { type: 'application/json' }));
-                form.append('file', new Blob([jsonData], { type: 'application/json' }));
-
-                const gApiResponse = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: new Headers({ 'Authorization': `Bearer ${gapi.client.getToken().access_token}` }),
-                    body: form
-                });
-
-                if (!gApiResponse.ok) {
-                    const errorBody = await gApiResponse.text();
-                    console.error('Google API Upload Error:', errorBody);
-                    throw new Error(`HTTP error! status: ${gApiResponse.status}, message: ${errorBody}`);
-                }
-
-                const result = await gApiResponse.json();
-                await manageBackupFiles(folderId);
-                return result;
-            } catch (error) {
-                console.error('Error uploading to Google Drive:', error);
-                 throw new Error(`Upload failed: ${error.message || error.details || error}`);
-            }
-        }
-
-        async function manageBackupFiles(folderId) {
-            try {
-                const response = await gapi.client.drive.files.list({
-                    q: `'${folderId}' in parents and name contains 'ReviveSubs_Backup_' and trashed=false`,
-                    orderBy: 'createdTime desc', // Keep newest
-                    fields: 'files(id, name, createdTime)'
-                });
-
-                const files = response.result.files;
-                if (files && files.length > 3) {
-                    const filesToDelete = files.slice(3); // Oldest are at the end due to 'desc' sort
-                    for (const file of filesToDelete) {
-                        await gapi.client.drive.files.delete({ fileId: file.id });
-                        console.log(`Deleted old backup: ${file.name}`);
-                    }
-                }
-            } catch (error) {
-                console.error('Error managing backup files:', error);
-                // Non-critical, so don't throw, just log
-            }
-        }
-
-        async function listGoogleDriveBackups() {
-            try {
-                const folderId = await createBackupFolder(); // Ensure folder exists or get its ID
-                const response = await gapi.client.drive.files.list({
-                    q: `'${folderId}' in parents and name contains 'ReviveSubs_Backup_' and trashed=false`,
-                    orderBy: 'createdTime desc',
-                    fields: 'files(id, name, createdTime, size)'
-                });
-                return response.result.files || [];
-            } catch (error) {
-                console.error('Error listing backups:', error);
-                throw new Error(`Listing backups failed: ${error.message || error.details || error}`);
-            }
-        }
-
-        async function downloadBackupFromGoogleDrive(fileId) {
-            try {
-                const response = await gapi.client.drive.files.get({
-                    fileId: fileId,
-                    alt: 'media'
-                });
-                return response.body; // This is a string
-            } catch (error) {
-                console.error('Error downloading backup:', error);
-                throw new Error(`Download failed: ${error.message || error.details || error}`);
-            }
-        }
-
-        // ========== DATA IMPORT/EXPORT & CLEAR ==========
-        function exportAllData(type = 'local') {
-            const jsonData = JSON.stringify(data, null, 2);
-            const filenameBase = `ReviveSubs_FullBackup_${new Date().toISOString().split('T')[0]}`;
-            
-            if (type === 'local') {
-                downloadFile(jsonData, `${filenameBase}_local.json`, 'application/json;charset=utf-8;');
-                logRecentActivity('تصدير جميع البيانات (JSON محلي)');
-                showAlert('تم تصدير جميع البيانات محلياً بنجاح.', 'success');
-            } else if (type === 'cloud') {
-                exportToCloud(jsonData);
-            }
-        }
-
-        async function exportToCloud(jsonData) {
-            if (!isGoogleApiInitialized) {
-                 showAlert('واجهة Google API لم تهيأ بعد. يرجى المحاولة مرة أخرى.', 'warning'); return;
-            }
-            if (!isSignedIn) {
-                const signedInSuccess = await signInToGoogle();
-                if (!signedInSuccess) {
-                    // showAlert('يجب تسجيل الدخول إلى Google Drive أولاً.', 'warning'); // signInToGoogle shows alerts
-                    return;
-                }
-                // After successful sign-in, the token is set. Proceed if user clicks again or if we store the action.
-                // For now, user might need to click again. Or, we can try to proceed directly.
-                // Let's assume callback in initTokenClient has run and set gapi.client.getToken()
-                 if (!gapi.client.getToken()){
-                    showAlert('فشل الحصول على صلاحية الوصول. يرجى المحاولة مرة أخرى.', 'danger');
-                    return;
-                 }
-            }
-
-            try {
-                showAlert('جاري الرفع إلى Google Drive...', 'info', 5000);
-                const result = await uploadBackupToGoogleDrive(jsonData);
-                logRecentActivity('تصدير جميع البيانات (Google Drive)');
-                showAlert('تم تصدير البيانات إلى Google Drive بنجاح!', 'success');
-            } catch (error) {
-                console.error('Error exporting to cloud:', error);
-                showAlert(`فشل في تصدير البيانات إلى Google Drive: ${error.message}`, 'danger');
-            }
-        }
-
-        function importData(type = 'local') {
-            if (type === 'local') {
-                importLocalData();
-            } else if (type === 'cloud') {
-                importFromCloud();
-            }
-        }
-        
-        function importLocalData() {
-            const input = document.createElement('input'); input.type = 'file'; input.accept = '.json';
-            input.onchange = async (event) => {
-                const file = event.target.files[0];
-                if (file && confirm('سيؤدي استيراد البيانات إلى الكتابة فوق جميع البيانات الحالية. هل أنت متأكد؟')) {
-                    const reader = new FileReader();
-                    reader.onload = async (e) => {
-                        await processImportedData(e.target.result, file.name);
-                    };
-                    reader.readAsText(file);
-                }
-            };
-            input.click();
-        }
-
-        async function importFromCloud() {
-            if (!isGoogleApiInitialized) {
-                 showAlert('واجهة Google API لم تهيأ بعد. يرجى المحاولة مرة أخرى.', 'warning'); return;
-            }
-            if (!isSignedIn) {
-                const signedInSuccess = await signInToGoogle();
-                if (!signedInSuccess) return;
-                 if (!gapi.client.getToken()){
-                    showAlert('فشل الحصول على صلاحية الوصول. يرجى المحاولة مرة أخرى.', 'danger');
-                    return;
-                 }
-            }
-            try {
-                showAlert('جاري تحميل قائمة النسخ الاحتياطية...', 'info', 5000);
-                const backups = await listGoogleDriveBackups();
-                if (backups.length === 0) {
-                    showAlert('لا توجد نسخ احتياطية في Google Drive.', 'warning');
-                    return;
-                }
-                showBackupSelectionModal(backups);
-            } catch (error) {
-                console.error('Error importing from cloud:', error);
-                showAlert(`فشل في الوصول إلى Google Drive: ${error.message}`, 'danger');
-            }
-        }
-
-        async function processImportedData(jsonString, fileName) {
-            try {
-                const imported = JSON.parse(jsonString);
-                const defaultStructure = initializeDefaultDataStructure(false);
-                
-                if (imported && imported.settings && Array.isArray(imported.members) && Array.isArray(imported.anime) && Array.isArray(imported.series)) {
-                    data = { ...defaultStructure, ...imported };
-                    data.settings = { ...defaultStructure.settings, ...(imported.settings || {}) };
-                    if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
-                    
-                    await saveData();
-                    unsavedChanges = false;
-                    logRecentActivity(`استيراد ملف: ${fileName}`);
-                    showAlert('تم استيراد البيانات بنجاح.', 'success');
-                    updateAllDisplays();
-                } else {
-                    showAlert('ملف الاستيراد غير صالح أو بتنسيق خاطئ.', 'danger');
-                }
-            } catch (error) {
-                console.error("Error processing imported data:", error);
-                showAlert('خطأ أثناء معالجة البيانات المستوردة.', 'danger');
-            }
-        }
-
-        function showBackupSelectionModal(backups) {
-            const backupsListEl = getEl('backupsList');
-            backupsListEl.innerHTML = ''; // Clear previous list
-            
-            if (!backups || backups.length === 0) {
-                backupsListEl.innerHTML = '<p class="text-muted">لا توجد نسخ احتياطية متاحة.</p>';
-                setStyle('backupSelectionModal', 'display', 'block');
-                return;
-            }
-
-            backups.forEach(backup => {
-                const backupItem = document.createElement('div');
-                backupItem.style.cssText = "padding: 15px; border: 1px solid var(--border-color); border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: background-color 0.2s;";
-                backupItem.onmouseover = () => backupItem.style.backgroundColor = 'var(--bg-hover-user)';
-                backupItem.onmouseout = () => backupItem.style.backgroundColor = '';
-                
-                const createdDate = new Date(backup.createdTime).toLocaleString('ar-EG', {dateStyle: 'medium', timeStyle: 'short'});
-                const size = backup.size ? `${(backup.size / 1024).toFixed(2)} KB` : 'غير معروف';
-                
-                backupItem.innerHTML = `
-                    <div style="font-weight: bold; margin-bottom: 5px; word-break: break-all;">${backup.name}</div>
-                    <div style="font-size: 0.9em; color: var(--text-secondary);">
-                        التاريخ: ${createdDate}<br>
-                        الحجم: ${size}
-                    </div>
-                `;
-                
-                backupItem.onclick = () => {
-                    if (confirm('هل أنت متأكد من استيراد هذه النسخة الاحتياطية؟ سيؤدي ذلك إلى الكتابة فوق جميع البيانات الحالية.')) {
-                        downloadAndImportBackup(backup.id, backup.name);
-                        closeModal('backupSelectionModal');
-                    }
-                };
-                backupsListEl.appendChild(backupItem);
-            });
-            setStyle('backupSelectionModal', 'display', 'block');
-        }
-
-        async function downloadAndImportBackup(fileId, fileName) {
-            try {
-                showAlert('جاري تحميل النسخة الاحتياطية المختارة...', 'info', 5000);
-                const jsonData = await downloadBackupFromGoogleDrive(fileId);
-                await processImportedData(jsonData, `Cloud Backup: ${fileName}`);
-            } catch (error) {
-                console.error('Error downloading and importing backup:', error);
-                showAlert(`فشل في تحميل واستيراد النسخة الاحتياطية: ${error.message}`, 'danger');
-            }
-        }
-
-
+        // ========== DATA IMPORT/EXPORT & CLEAR (MODIFIED FOR CLOUD) ==========
+        // Note: exportAllData and importData are now defined at the end with cloud logic
         function downloadFile(content, filename, contentType) { const a = document.createElement('a'), file = new Blob([content],{type:contentType}); a.href=URL.createObjectURL(file); a.download=filename; a.click(); URL.revokeObjectURL(a.href); }
 
         // ========== EXTERNAL API FETCHING (MAL & TMDB) ==========
@@ -2852,99 +2308,38 @@
         function drawMonthlyPaymentsChart(canvasId) { const monthlyPayments={}; const today=new Date(); for(let i=5;i>=0;i--){const d=new Date(today.getFullYear(),today.getMonth()-i,1);monthlyPayments[d.toLocaleDateString('ar-EG',{year:'numeric',month:'short'})]=0;} data.members.forEach(m=>{if(m.amountReceived&&m.amountReceived>0){const k=Object.keys(monthlyPayments)[0];monthlyPayments[k]+=(m.amountReceived/data.members.length);}}); drawChart(canvasId,'line',{labels:Object.keys(monthlyPayments),datasets:[{label:'المدفوعات',data:Object.values(monthlyPayments),backgroundColor:'rgba(16,185,129,0.2)',borderColor:getCSSVar('--accent-green'),borderWidth:2,fill:true,tension:0.4}]},{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:'rgba(0,0,0,0.8)',titleColor:'#fff',bodyColor:'#fff',borderColor:getCSSVar('--accent-green'),borderWidth:1,padding:10,callbacks:{label:c=>'المدفوعات: '+formatMoney(c.parsed.y)}}},scales:{y:{beginAtZero:true,ticks:{color:getCSSVar('--text-secondary'),callback:v=>formatMoney(v)},grid:{color:'rgba(255,255,255,0.05)'}},x:{ticks:{color:getCSSVar('--text-secondary')},grid:{display:false}}}},'monthlyPaymentsChartInstance'); }
         
         // ========== REPORTS ==========
-        function populateMemberReportDropdown() { requestAnimationFrame(() => { const sel=getEl('reportMemberSelect'); if(!sel)return; const curVal=sel.value; sel.innerHTML='<option value="">اختر عضواً...</option>'; data.members.sort((a,b) => a.name.localeCompare(b.name)).forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=m.name;sel.appendChild(opt);}); if(Array.from(sel.options).some(o=>o.value===curVal))sel.value=curVal; }); }
-        function generateReport(type) { requestAnimationFrame(() => { let html=''; const reportContentEl=getEl('reportContent'); if(type==='monthly')html=generateMonthlyReport(new Date()); else if(type==='projects')html=generateProjectsReport(); else if(type==='memberDetailed'){const mId=getVal('reportMemberSelect');if(!mId){showAlert('يرجى اختيار عضو.', 'warning');if(reportContentEl)reportContentEl.innerHTML='<p class="text-center text-muted">يرجى اختيار عضو.</p>';return;}html=generateDetailedMemberReport(mId);} if(reportContentEl)reportContentEl.innerHTML=html||'<p class="text-center text-muted">لا توجد بيانات للتقرير المختار.</p>'; }); }
+        function populateMemberReportDropdown() { requestAnimationFrame(() => { const sel=getEl('reportMemberSelect'); if(!sel)return; const curVal=sel.value; sel.innerHTML='<option value="">اختر عضواً...</option>'; data.members.forEach(m=>{const opt=document.createElement('option');opt.value=m.id;opt.textContent=m.name;sel.appendChild(opt);}); if(Array.from(sel.options).some(o=>o.value===curVal))sel.value=curVal; }); }
+        function generateReport(type) { requestAnimationFrame(() => { let html=''; const reportContentEl=getEl('reportContent'); if(type==='monthly')html=generateMonthlyReport(new Date()); else if(type==='projects')html=generateProjectsReport(); else if(type==='memberDetailed'){const mId=getVal('reportMemberSelect');if(!mId){showAlert('يرجى اختيار عضو.', 'warning');if(reportContentEl)reportContentEl.innerHTML='<p class="text-center text-muted">يرجى اختيار عضو.</p>';return;}html=generateDetailedMemberReport(mId);} if(reportContentEl)reportContentEl.innerHTML=html||'<p class="text-center text-muted">لا توجد بيانات.</p>'; }); }
         function generateDetailedMemberReport(memberId) { 
             const member=data.members.find(m=>m.id===memberId); if(!member)return'<p>العضو غير موجود.</p>'; 
-            let html=`<div class="report-header"><h3>التقرير المفصل: ${member.name}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`; 
-            html+=`<div class="report-section"><h4>ملخص العمل والمستحقات</h4><ul><li>إجمالي الحلقات المترجمة: <strong>${member.projectTranslatedEpisodes||0}</strong></li><li>إجمالي الحلقات المدققة: <strong>${member.projectEditedEpisodes||0}</strong></li><li>إجمالي الحلقات المحاكية: <strong>${member.projectTimedEpisodes||0}</strong></li><li>إجمالي الحلقات الموقتة: <strong>${member.projectSubtitledEpisodes||0}</strong></li><hr style="margin: 10px 0; border-color: var(--border-color);"><li>الأجرة الكلية: <strong class="${getMoneyClass(member.totalFee||0)}">${formatMoney(member.totalFee||0)}</strong></li><li>المستلم: <strong class="${getMoneyClass(member.amountReceived||0)}">${formatMoney(member.amountReceived||0)}</strong></li><li>المتبقي: <strong class="${getMoneyClass((member.totalFee||0)-(member.amountReceived||0))}">${formatMoney((member.totalFee||0)-(member.amountReceived||0))}</strong></li></ul></div>`; 
+            let html=`<div class="report-header"><h3>التقرير المفصل: ${member.name}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('en-GB')}</p></div>`; 
+            html+=`<div class="report-section"><h4>ملخص العمل والمستحقات</h4><ul><li>إجمالي الحلقات المترجمة: <strong>${member.projectTranslatedEpisodes||0}</strong></li><li>إجمالي الحلقات المدققة: <strong>${member.projectEditedEpisodes||0}</strong></li><li>إجمالي الحلقات المحاكية: <strong>${member.projectTimedEpisodes||0}</strong></li><li>إجمالي الحلقات الموقتة: <strong>${member.projectSubtitledEpisodes||0}</strong></li><hr><li>الأجرة الكلية: <strong class="${getMoneyClass(member.totalFee||0)}">${formatMoney(member.totalFee||0)}</strong></li><li>المستلم: <strong class="${getMoneyClass(member.amountReceived||0)}">${formatMoney(member.amountReceived||0)}</strong></li><li>المتبقي: <strong class="${getMoneyClass((member.totalFee||0)-(member.amountReceived||0))}">${formatMoney((member.totalFee||0)-(member.amountReceived||0))}</strong></li></ul></div>`; 
             html+=`<div class="report-section"><h4>تفاصيل المشاريع</h4>`; const rows=[]; 
             [...data.anime,...data.series].forEach(p=>{ let pType=data.anime.some(a=>a.id===p.id)?'أنمي':'مسلسل', compInP=p.completedEpisodes||0, rolesData=[{r:'مترجم',pid:p.translatorId,price:p.translationPrice,bonus:p.translationBonus},{r:'مدقق',pid:p.editorId,price:p.editingPrice,bonus:p.editingBonus},{r:'محاكي',pid:p.timerId,price:p.timerPrice,bonus:p.timerBonus},{r:'موقت',pid:p.subtitlerId,price:p.subtitlerPrice,bonus:p.subtitlerBonus}]; rolesData.forEach(rd=>{if(rd.pid===member.id&&compInP>0){let base=compInP*(rd.price||0),bonus=rd.bonus||0;rows.push(`<tr><td>${p.name} (${pType})</td><td>${rd.r}</td><td>${compInP}</td><td class="${getMoneyClass(base)}">${formatMoney(base)}</td><td class="${getMoneyClass(bonus)}">${formatMoney(bonus)}</td><td class="${getMoneyClass(base+bonus)}">${formatMoney(base+bonus)}</td></tr>`);}}); }); 
-            if(rows.length>0)html+=`<div class="table-container"><table><thead><tr><th>المشروع</th><th>الدور</th><th>الحلقات</th><th>الأجرة الأساسية</th><th>إضافي/مخصوم</th><th>الإجمالي</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`; else html+=`<p>لم يعمل هذا العضو على أي مشاريع مكتملة الحلقات بعد.</p>`; html+=`</div>`; return html; 
+            if(rows.length>0)html+=`<div class="table-container"><table><thead><tr><th>المشروع</th><th>الدور</th><th>الحلقات</th><th>الأجرة الأساسية</th><th>إضافي/مخصوم</th><th>الإجمالي</th></tr></thead><tbody>${rows.join('')}</tbody></table></div>`; else html+=`<p>لم يعمل هذا العضو على أي مشاريع مكتملة الحلقات.</p>`; html+=`</div>`; return html; 
         }
         function generateMonthlyReport(date) {
             const month=date.getMonth(),year=date.getFullYear(),monthName=date.toLocaleDateString('ar-SA',{month:'long',year:'numeric'});
-            let html=`<div class="report-header"><h3>التقرير الشهري لـ ${monthName}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`;
+            let html=`<div class="report-header"><h3>التقرير الشهري لـ ${monthName}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('en-GB')}</p></div>`;
             const monthlyStats=calculateDashboardStatistics(); html+=`<div class="report-section"><h4>ملخص الشهر</h4><ul><li>المشاريع النشطة: <strong>${monthlyStats.projects.active}</strong></li><li>الحلقات المنجزة (إجمالي): <strong>${monthlyStats.episodes.total}</strong></li><li>المدفوعات (إجمالي): <strong>${formatMoney(monthlyStats.financial.totalPaid)}</strong></li></ul></div>`;
             const projectsThisMonthIds=new Set();
             (data.recentActivityLog || []).forEach(log=>{
                 const logDate=new Date(log.timestamp);
-                if(logDate.getMonth()===month&&logDate.getFullYear()===year && (log.message.includes('مشروع') || log.message.includes('حلقات مشروع'))) {
-                    // Try to extract project name more robustly
-                    let projectNameMatch = log.message.match(/مشروع \((?:anime|series)\) (.*?)(?::| ->| \()/i);
-                    if (!projectNameMatch) {
-                         projectNameMatch = log.message.match(/حلقات مشروع \((?:anime|series)\) (.*?):/i);
-                    }
-                    if (projectNameMatch && projectNameMatch[1]) {
-                        const pName = projectNameMatch[1].trim();
-                        const project = [...data.anime, ...data.series].find(p => p.name === pName);
-                        if (project) projectsThisMonthIds.add(project.id);
+                if(logDate.getMonth()===month&&logDate.getFullYear()===year && log.message.includes('مشروع')){
+                    const match=log.message.match(/مشروع \((anime|series)\) (.*?)(:|$)/);
+                    if(match&&match[2]){
+                        const pName=match[2].trim();
+                        const project=[...data.anime,...data.series].find(p=>p.name===pName);
+                        if(project)projectsThisMonthIds.add(project.id);
                     }
                 }
             });
             const projectsWorked=[...data.anime,...data.series].filter(p=>projectsThisMonthIds.has(p.id));
-            html+=`<div class="report-section"><h4>المشاريع التي تم العمل عليها هذا الشهر (${projectsWorked.length})</h4>`; if(projectsWorked.length>0){html+=`<div class="table-container"><table><thead><tr><th>المشروع</th><th>النوع</th><th>التقدم</th><th>الحالة</th><th>التكلفة حتى الآن</th></tr></thead><tbody>`;projectsWorked.forEach(p=>{const type=data.anime.some(a=>a.id===p.id)?'أنمي':'مسلسل',perc=p.totalEpisodes>0?((p.completedEpisodes/p.totalEpisodes)*100).toFixed(1):0;html+=`<tr><td>${p.name}</td><td>${type}</td><td>${p.completedEpisodes||0}/${p.totalEpisodes||'?'} (${perc}%)</td><td>${p.status}</td><td class="${getMoneyClass(p.totalCost||0)}">${formatMoney(p.totalCost||0)}</td></tr>`;});html+=`</tbody></table></div>`;}else html+=`<p>لم يتم تسجيل نشاط على مشاريع هذا الشهر.</p>`; html+=`</div>`; return html;
+            html+=`<div class="report-section"><h4>المشاريع التي تم العمل عليها هذا الشهر (${projectsWorked.length})</h4>`; if(projectsWorked.length>0){html+=`<div class="table-container"><table><thead><tr><th>المشروع</th><th>النوع</th><th>التقدم</th><th>الحالة</th></tr></thead><tbody>`;projectsWorked.forEach(p=>{const type=data.anime.some(a=>a.id===p.id)?'أنمي':'مسلسل',perc=p.totalEpisodes>0?((p.completedEpisodes/p.totalEpisodes)*100).toFixed(1):0;html+=`<tr><td>${p.name}</td><td>${type}</td><td>${p.completedEpisodes}/${p.totalEpisodes} (${perc}%)</td><td>${p.status}</td></tr>`;});html+=`</tbody></table></div>`;}else html+=`<p>لم يتم العمل على مشاريع مسجلة هذا الشهر.</p>`; html+=`</div>`; return html;
         }
-        function generateProjectsReport() { 
-            const activeP=[...data.anime,...data.series].filter(p=>p.status==='جارٍ'),
-                  completedP=[...data.anime,...data.series].filter(p=>p.status==='مكتمل'),
-                  upcomingP=[...data.anime,...data.series].filter(p=>p.status==='قريباً'),
-                  stoppedP=[...data.anime,...data.series].filter(p=>p.status==='متوقف');
-            let html=`<div class="report-header"><h3>تقرير حالة المشاريع</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`; 
-            const genTable=(title,list)=>{
-                let tHtml=`<div class="report-section"><h4>${title} (${list.length})</h4>`;
-                if(list.length===0){tHtml+=`<p>لا توجد مشاريع في هذه الحالة.</p></div>`;return tHtml;}
-                tHtml+=`<div class="table-container"><table><thead><tr><th>المشروع</th><th>النوع</th><th>التقدم</th><th>المترجم</th><th>المدقق</th><th>المحاكي</th><th>الموقت</th><th>التكلفة</th></tr></thead><tbody>`;
-                list.sort((a,b) => a.name.localeCompare(b.name)).forEach(p=>{
-                    const perc=p.totalEpisodes>0?((p.completedEpisodes/p.totalEpisodes)*100).toFixed(1):0;
-                    const type=data.anime.some(a=>a.id===p.id)?'أنمي':'مسلسل';
-                    const tr=p.translatorId?data.members.find(m=>m.id===p.translatorId)?.name:'-';
-                    const ed=p.editorId?data.members.find(m=>m.id===p.editorId)?.name:'-';
-                    const ti=p.timerId?data.members.find(m=>m.id===p.timerId)?.name:'-';
-                    const su=p.subtitlerId?data.members.find(m=>m.id===p.subtitlerId)?.name:'-';
-                    tHtml+=`<tr><td>${p.name}</td><td>${type}</td><td>${p.completedEpisodes||0}/${p.totalEpisodes||'?'} (${perc}%)</td><td>${tr}</td><td>${ed}</td><td>${ti}</td><td>${su}</td><td class="${getMoneyClass(p.totalCost||0)}">${formatMoney(p.totalCost||0)}</td></tr>`;
-                });
-                tHtml+=`</tbody></table></div></div>`;
-                return tHtml;
-            }; 
-            html+=genTable('المشاريع النشطة',activeP);
-            html+=genTable('المشاريع المكتملة',completedP);
-            html+=genTable('المشاريع القادمة',upcomingP);
-            html+=genTable('المشاريع المتوقفة',stoppedP); 
-            return html;
-        }
-        function printReport() { const content=getEl('reportContent').innerHTML; if(!content||content.includes("اختر نوع التقرير") || content.includes("لا توجد بيانات")){showAlert('يرجى إنشاء تقرير صالح أولاً.','warning');return;} window.print(); }
-        function saveReportAsHTML() { 
-            const reportContentDiv = getEl('reportContent');
-            const content= reportContentDiv ? reportContentDiv.innerHTML : ""; 
-            if(!content||content.trim()===''||content.includes("اختر نوع التقرير") || content.includes("لا توجد بيانات")){showAlert('يجب إنشاء تقرير صالح أولاً.','warning');return;} 
-            const reportTitleText = reportContentDiv.querySelector('.report-header h3') ? reportContentDiv.querySelector('.report-header h3').textContent : 'تقرير ReviveSubs';
-            const filename = `ReviveSubs_${reportTitleText.replace(/[^\w\s]/gi, '').replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.html`;
-            const fullHtml=`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>${reportTitleText}</title><style>
-            :root {
-                --text-main: #000; --text-secondary: #555; --border-color: #ccc; 
-                --report-header-bg-var: #f0f0f0; --report-table-th-bg-var: #e9e9e9; 
-                --accent-green: #008000; --accent-yellow: #DAA520; --accent-red: #cc0000; 
-            }
-            body{font-family:Arial, Tahoma, sans-serif;direction:rtl;padding:20px;margin:0 auto;max-width:1000px;background-color:#fff;color:var(--text-main);} 
-            table{width:100%;border-collapse:collapse;margin:20px 0; page-break-inside: auto;}
-            th,td{border:1px solid var(--border-color);padding:8px;text-align:right; font-size: 9pt; word-break: break-word;}
-            th{background-color:var(--report-table-th-bg-var); font-weight: bold;}
-            thead { display: table-header-group; } tfoot { display: table-footer-group; }
-            tr { page-break-inside: avoid; page-break-after: auto; }
-            .report-header{background:var(--report-header-bg-var);padding:15px;margin-bottom:15px;border:1px solid var(--border-color); page-break-inside: avoid;}
-            .report-header h3 { font-size: 14pt; margin: 0 0 8px 0; } .report-header p { font-size: 9pt; margin: 0; }
-            .report-section{margin:15px 0;padding:10px;border:1px solid var(--border-color); page-break-inside: avoid;}
-            .report-section h4 { font-size: 12pt; margin: 0 0 8px 0; border-bottom: 1px solid #666; padding-bottom: 4px;}
-            .report-section ul { padding-right: 20px; margin: 0 0 10px 0; font-size: 9pt; } .report-section li { margin-bottom: 4px; }
-            .money-positive{color:var(--accent-green); font-weight: bold;}
-            .money-zero{color:var(--accent-yellow); font-weight: bold;}
-            .money-negative{color:var(--accent-red); font-weight: bold;}
-            .table-container{overflow-x:auto}
-            hr {margin: 10px 0; border-color: var(--border-color); border-style: solid; border-width: 0.5px 0 0 0;}
-            </style></head><body><h1>ReviveSubs</h1>${content}<hr><p style="font-size:8pt; text-align:center;">التاريخ: ${new Date().toLocaleString('ar-EG')}</p></body></html>`; 
-            downloadFile(fullHtml, filename,'text/html;charset=utf-8;');
-        }
+        function generateProjectsReport() { const activeP=[...data.anime,...data.series].filter(p=>p.status==='جارٍ'),completedP=[...data.anime,...data.series].filter(p=>p.status==='مكتمل'),upcomingP=[...data.anime,...data.series].filter(p=>p.status==='قريباً'); let html=`<div class="report-header"><h3>تقرير حالة المشاريع</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('en-GB')}</p></div>`; const genTable=(title,list)=>{let tHtml=`<div class="report-section"><h4>${title} (${list.length})</h4>`;if(list.length===0){tHtml+=`<p>لا توجد مشاريع.</p></div>`;return tHtml;}tHtml+=`<div class="table-container"><table><thead><tr><th>المشروع</th><th>النوع</th><th>التقدم</th><th>المترجم</th><th>المدقق</th><th>المحاكي</th><th>الموقت</th><th>التكلفة</th></tr></thead><tbody>`;list.forEach(p=>{const perc=p.totalEpisodes>0?((p.completedEpisodes/p.totalEpisodes)*100).toFixed(1):0,type=data.anime.some(a=>a.id===p.id)?'أنمي':'مسلسل',tr=p.translatorId?data.members.find(m=>m.id===p.translatorId)?.name:'-',ed=p.editorId?data.members.find(m=>m.id===p.editorId)?.name:'-',ti=p.timerId?data.members.find(m=>m.id===p.timerId)?.name:'-',su=p.subtitlerId?data.members.find(m=>m.id===p.subtitlerId)?.name:'-';tHtml+=`<tr><td>${p.name}</td><td>${type}</td><td>${p.completedEpisodes}/${p.totalEpisodes} (${perc}%)</td><td>${tr}</td><td>${ed}</td><td>${ti}</td><td>${su}</td><td>${formatMoney(p.totalCost||0)}</td></tr>`;});tHtml+=`</tbody></table></div></div>`;return tHtml;}; html+=genTable('المشاريع النشطة',activeP);html+=genTable('المشاريع المكتملة',completedP);html+=genTable('المشاريع القادمة',upcomingP); return html;}
+        function printReport() { const content=getEl('reportContent').innerHTML; if(!content||content.includes("اختر نوع التقرير")){showAlert('يرجى إنشاء تقرير أولاً.','warning');return;} window.print(); }
+        function saveReportAsHTML() { const content=getEl('reportContent').innerHTML; if(!content||content.trim()===''||content.includes("اختر نوع التقرير")){showAlert('يجب إنشاء تقرير أولاً.','warning');return;} const fullHtml=`<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><title>تقرير - ${new Date().toLocaleDateString('ar-EG')}</title><style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;margin:0 auto;max-width:1000px;background-color:var(--bg-primary-user, #0f0f0f);color:var(--text-main, #fff);} :root{--border-color:#333;--accent-green:#10b981;--accent-yellow:#f59e0b;--accent-red:#ef4444;--report-header-bg-var:#1a1a1a;--report-table-th-bg-var:#242424;} table{width:100%;border-collapse:collapse;margin:20px 0}th,td{border:1px solid var(--border-color);padding:8px;text-align:right}th{background-color:var(--report-table-th-bg-var)}.report-header{background:var(--report-header-bg-var);padding:20px;margin-bottom:20px;border-radius:8px;border:1px solid var(--border-color)}.report-section{margin:20px 0;padding:15px;border:1px solid var(--border-color);border-radius:8px}.money-positive{color:var(--accent-green)}.money-zero{color:var(--accent-yellow)}.money-negative{color:var(--accent-red)}.table-container{overflow-x:auto}</style></head><body><h1>ReviveSubs</h1>${content}<hr><p>التاريخ: ${new Date().toLocaleString('en-US')}</p></body></html>`; downloadFile(fullHtml,`ReviveSubs_Report_${new Date().toISOString().split('T')[0]}.html`,'text/html');}
         
         // ========== SETTINGS ==========
         function loadSettings() { 
@@ -2998,6 +2393,201 @@
                 getEl('headerLinkTelegram').href = data.settings.headerLinkTelegramUrl || "#";
                 getEl('headerLinkDrive').href = data.settings.headerLinkDriveUrl || "#";
             });
+        }
+
+        // ========== GITHUB CLOUD SYNC FUNCTIONS ==========
+        const GITHUB_TOKEN = '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'; // User Provided Token
+        const GITHUB_USERNAME = '90sa90'; // User Provided Username
+
+        function toggleDropdown(menuId) {
+            const menu = document.getElementById(menuId);
+            const isVisible = menu.style.display !== 'none';
+            
+            document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+            
+            if (!isVisible) {
+                menu.style.display = 'block';
+                setTimeout(() => { // Add listener after current event loop to prevent immediate self-closing
+                    document.addEventListener('click', function hideMenuOnClickOutside(event) {
+                        const clickedButton = event.target.closest(`button[onclick*="${menuId}"]`);
+                        if (!menu.contains(event.target) && !clickedButton) {
+                            menu.style.display = 'none';
+                            document.removeEventListener('click', hideMenuOnClickOutside);
+                        }
+                    }, { once: true }); // Use once to auto-remove after one execution
+                }, 0);
+            }
+        }
+
+        async function saveToCloud() {
+            try {
+                if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
+                    showAlert('لم يتم تكوين توكن GitHub للحفظ السحابي.', 'danger'); return;
+                }
+                showAlert('جاري الحفظ السحابي...', 'info', 2000);
+                
+                const gistsResponse = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/gists`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                });
+                
+                if (gistsResponse.ok) {
+                    const gists = await gistsResponse.json();
+                    const appGists = gists.filter(g => g.description === 'ReviveSubs-Backup');
+                    appGists.sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // Sort oldest first
+
+                    // Ensure we keep at most 2 backups. If we have 2 or more, delete oldest to make space.
+                    if (appGists.length >= 2) { 
+                        const oldestGist = appGists[0];
+                        await fetch(`https://api.github.com/gists/${oldestGist.id}`, {
+                            method: 'DELETE',
+                            headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
+                        });
+                         logRecentActivity(`تم حذف أقدم نسخة سحابية (${oldestGist.id}) للحفاظ على الحد الأقصى (2).`);
+                    }
+                } else {
+                    console.warn("فشل في جلب قائمة النسخ الاحتياطية الحالية، سيتم إنشاء نسخة جديدة على أي حال.");
+                }
+                
+                const response = await fetch('https://api.github.com/gists', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${GITHUB_TOKEN}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify({
+                        description: 'ReviveSubs-Backup',
+                        public: false,
+                        files: {
+                            'revivesubs_backup.json': { // Filename in Gist
+                                content: JSON.stringify(data, null, 2)
+                            }
+                        }
+                    })
+                });
+                
+                if (response.ok) {
+                    const newGist = await response.json();
+                    showAlert('تم الحفظ السحابي بنجاح!', 'success');
+                    logRecentActivity(`تم حفظ نسخة احتياطية سحابية: ${newGist.id}`);
+                } else {
+                    const errorData = await response.json();
+                    console.error('GitHub API Error:', errorData);
+                    throw new Error(`فشل الحفظ السحابي: ${errorData.message || response.status}`);
+                }
+                
+            } catch (error) {
+                console.error('Cloud Save Error:', error);
+                showAlert('خطأ في الحفظ السحابي: ' + error.message, 'danger');
+            }
+        }
+
+        async function loadFromCloud() {
+            try {
+                if (!GITHUB_TOKEN || GITHUB_TOKEN === 'YOUR_GITHUB_TOKEN_HERE') {
+                    showAlert('لم يتم تكوين توكن GitHub للتحميل السحابي.', 'danger'); return;
+                }
+                showAlert('جاري التحميل من السحابة...', 'info', 2000);
+                
+                const response = await fetch(`https://api.github.com/users/${GITHUB_USERNAME}/gists`, {
+                    headers: { 'Authorization': `token ${GITHUB_TOKEN}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+                
+                if (!response.ok) throw new Error('فشل الاتصال بخدمة GitHub Gists');
+                
+                const gists = await response.json();
+                let appGists = gists.filter(g => g.description === 'ReviveSubs-Backup' && g.files['revivesubs_backup.json']);
+                
+                if (appGists.length === 0) {
+                    showAlert('لا توجد نسخ احتياطية سحابية متوافقة.', 'info');
+                    return;
+                }
+                
+                appGists.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // Sort newest first
+                const latestGist = appGists[0];
+                
+                // Gist content is in files[filename].raw_url or need to fetch the gist itself for content
+                const raw_url = latestGist.files['revivesubs_backup.json'].raw_url;
+                const gistFileResponse = await fetch(raw_url);
+
+                if (!gistFileResponse.ok) throw new Error('فشل جلب محتوى النسخة الاحتياطية');
+                
+                const backupContent = await gistFileResponse.text();
+                
+                if (!backupContent) throw new Error('ملف النسخة الاحتياطية فارغ أو غير موجود');
+                
+                if (confirm(`هل تريد استيراد آخر نسخة سحابية (${new Date(latestGist.created_at).toLocaleString('ar-EG')})؟ سيتم الكتابة فوق البيانات الحالية.`)) {
+                    const importedData = JSON.parse(backupContent);
+                    
+                    const defaultStructure = initializeDefaultDataStructure(false);
+                    if (importedData && importedData.members && importedData.anime && importedData.series) { // Basic validation
+                        data = { ...defaultStructure, ...importedData };
+                        data.settings = { ...defaultStructure.settings, ...(importedData.settings || {}) };
+                        if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
+                        
+                        await saveData(); // Save to IndexedDB
+                        unsavedChanges = false;
+                        showAlert('تم الاستيراد من السحابة بنجاح!', 'success');
+                        updateAllDisplays();
+                        logRecentActivity(`تم استيراد نسخة احتياطية سحابية من: ${latestGist.id}`);
+                    } else {
+                        throw new Error('ملف النسخة الاحتياطية السحابية غير صالح.');
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Cloud Load Error:', error);
+                showAlert('خطأ في التحميل السحابي: ' + error.message, 'danger');
+            }
+        }
+
+        function exportAllData(type = 'local') { // Modified
+            if (type === 'cloud') {
+                saveToCloud();
+            } else {
+                downloadFile(JSON.stringify(data, null, 2), `ReviveSubs_Backup_${new Date().toISOString().split('T')[0]}.json`, 'application/json;charset=utf-8;');
+                logRecentActivity('تصدير البيانات محلياً');
+                showAlert('تم التصدير محلياً بنجاح.', 'success');
+            }
+        }
+
+        function importData(type = 'local') { // Modified
+            if (type === 'cloud') {
+                loadFromCloud();
+            } else {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                input.onchange = async (event) => {
+                    const file = event.target.files[0];
+                    if (file && confirm('سيؤدي استيراد البيانات إلى الكتابة فوق جميع البيانات الحالية. هل أنت متأكد؟')) {
+                        const reader = new FileReader();
+                        reader.onload = async (e) => {
+                            try {
+                                const imported = JSON.parse(e.target.result);
+                                const defaultStructure = initializeDefaultDataStructure(false);
+                                if (imported && imported.settings && Array.isArray(imported.members) && Array.isArray(imported.anime) && Array.isArray(imported.series)) {
+                                    data = { ...defaultStructure, ...imported };
+                                    data.settings = { ...defaultStructure.settings, ...(imported.settings || {}) };
+                                    if (!Array.isArray(data.recentActivityLog)) data.recentActivityLog = [];
+                                    await saveData();
+                                    unsavedChanges = false;
+                                    logRecentActivity(`استيراد ملف محلي: ${file.name}`);
+                                    showAlert('تم استيراد البيانات بنجاح.', 'success');
+                                    updateAllDisplays();
+                                } else {
+                                    showAlert('ملف الاستيراد غير صالح.', 'danger');
+                                }
+                            } catch (error) {
+                                console.error("Error importing data:", error);
+                                showAlert('خطأ أثناء استيراد البيانات.', 'danger');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                input.click();
+            }
         }
 
     </script>
