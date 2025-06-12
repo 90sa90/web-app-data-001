@@ -2900,7 +2900,7 @@
                             <div class="form-group"> <label for="projectThemes">المواضيع (Themes)</label> <input type="text" class="form-control" id="projectThemes" placeholder="مثال: Super Power, Mecha"> </div>
                             <div class="form-group"> <label for="projectImageUrl">رابط الصورة</label> <input type="url" class="form-control" id="projectImageUrl"> </div>
                             <div class="form-group"> <label for="projectSynopsis">نبذة MAL</label> <textarea class="form-control" id="projectSynopsis" rows="3"></textarea> </div>
-                            <div class="form-group"> <label for="projectNotes">ملاحظات داخلية</label> <textarea class="form-control" id="projectNotes" rows="2" placeholder="ملاحظات لا تظهر إلا للفريق..."></textarea> </div>
+                            <div class="form-group"> <label for="anime-projectNotes">ملاحظات داخلية</label> <textarea class="form-control" id="anime-projectNotes" rows="2" placeholder="ملاحظات لا تظهر إلا للفريق..."></textarea> </div>
                         </div>
                         <div id="tvdbFieldsContainer" class="${type === 'series' ? '' : 'hidden'}">
                             <div class="form-group"> <label for="projectSeriesNameSearch">اسم المسلسل للبحث في TMDB</label> <input type="text" class="form-control" id="projectSeriesNameSearch" placeholder="أدخل اسم المسلسل هنا للبحث..."> </div>
@@ -2919,7 +2919,7 @@
                                 <div class="form-group"> <label for="projectSeriesOriginalLanguage">اللغة الأصلية</label> <input type="text" class="form-control" id="projectSeriesOriginalLanguage"> </div>
                             </div>
                             <div class="form-group"> <label for="projectSeriesOverview">نبذة قصيرة</label> <textarea class="form-control" id="projectSeriesOverview" rows="2"></textarea> </div>
-                            <div class="form-group"> <label for="projectNotes">ملاحظات داخلية</label> <textarea class="form-control" id="projectNotes" rows="2" placeholder="ملاحظات لا تظهر إلا للفريق..."></textarea> </div>
+                            <div class="form-group"> <label for="series-projectNotes">ملاحظات داخلية</label> <textarea class="form-control" id="series-projectNotes" rows="2" placeholder="ملاحظات لا تظهر إلا للفريق..."></textarea> </div>
                         </div>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                             <div class="form-group"><label for="projectStatus">حالة المشروع (في فريقك) *</label><select class="form-control" id="projectStatus" required><option value="">اختر الحالة</option><option value="مكتمل">مكتمل</option><option value="جارٍ">جارٍ</option><option value="قريباً">قريباً</option><option value="متوقف">متوقف</option></select></div>
@@ -2943,12 +2943,13 @@
                         setVal('entityName', project.name);
 
                         Object.keys(projectConfig.dataProperties).forEach(propKey => { let val = Array.isArray(project[propKey]) ? project[propKey].join(', ') : (project[propKey] || ''); setVal(projectConfig.dataProperties[propKey], val); });
-                        setVal('projectNotes', project.notes || ''); 
-
+                        
                         if (type === 'anime') {
                             setVal('projectMalId', project.malId || '');
+                            setVal('anime-projectNotes', project.notes || '');
                         } else if (type === 'series') {
                             setVal('projectSeriesNameSearch', project.name);
+                            setVal('series-projectNotes', project.notes || '');
                         }
                         
                         projectConfig.formFields.forEach(fieldId => {
@@ -3069,7 +3070,7 @@
                 status: getVal('projectStatus'), 
                 totalEpisodes, 
                 completedEpisodes,
-                notes: getVal('projectNotes'), 
+                notes: (type === 'anime' ? getVal('anime-projectNotes') : getVal('series-projectNotes')), 
                 translatorId: getVal('projectTranslator') || null, 
                 editorId: getVal('projectEditor') || null, 
                 timerId: getVal('projectTimer') || null, 
