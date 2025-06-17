@@ -641,7 +641,7 @@
         
         #archiveCardGrid .project-actions { flex-wrap: wrap; justify-content: space-between; padding: 10px; }
         #archiveCardGrid .action-btn { flex: 1 1 calc(50% - 4px); min-width: 90px; }
-        #archiveCardGrid .archive-btn { order: 1; grid-column: 1 / -1; background: var(--gradient-green); }
+        /* #archiveCardGrid .archive-btn { order: 1; grid-column: 1 / -1; background: var(--gradient-green); } */ /* MODIFICATION: Removed */
 
         @media (max-width: 450px) {
             .project-card .project-header { padding: 15px; gap: 12px; min-height: auto; flex-direction: column; text-align: center; }
@@ -2717,13 +2717,21 @@
                 decreaseBtn.className = 'episode-control-btn'; 
                 decreaseBtn.innerHTML = '<i class="fas fa-minus"></i>';
                 decreaseBtn.disabled = (project.completedEpisodes || 0) <= 0;
-                decreaseBtn.onclick = (e) => { e.stopPropagation(); updateProjectEpisodes(type, project.id, -1); };
+                decreaseBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    const actualType = data.anime.some(a => a.id === project.id) ? 'anime' : 'series';
+                    updateProjectEpisodes(actualType, project.id, -1); 
+                };
                 
                 const increaseBtn = document.createElement('button');
                 increaseBtn.className = 'episode-control-btn'; 
                 increaseBtn.innerHTML = '<i class="fas fa-plus"></i>';
                 increaseBtn.disabled = project.totalEpisodes > 0 && (project.completedEpisodes || 0) >= project.totalEpisodes;
-                increaseBtn.onclick = (e) => { e.stopPropagation(); updateProjectEpisodes(type, project.id, 1); };
+                increaseBtn.onclick = (e) => { 
+                    e.stopPropagation(); 
+                    const actualType = data.anime.some(a => a.id === project.id) ? 'anime' : 'series';
+                    updateProjectEpisodes(actualType, project.id, 1); 
+                };
 
                 epControls.appendChild(decreaseBtn);
                 epControls.appendChild(increaseBtn);
@@ -2740,30 +2748,39 @@
             };
 
             const fragment = document.createDocumentFragment();
-            fragment.appendChild(createAction('تعديل', 'edit', () => showEntityModal(type, project.id)));
-            fragment.appendChild(createAction('تفاصيل', 'info-circle', () => showProjectDetailsModal(project.id, type)));
+
+            // تحديد النوع الفعلي للمشروع
+            const actualProjectType = data.anime.some(a => a.id === project.id) ? 'anime' : 'series';
+
+            fragment.appendChild(createAction('تعديل', 'edit', () => showEntityModal(actualProjectType, project.id)));
+            fragment.appendChild(createAction('تفاصيل', 'info-circle', () => showProjectDetailsModal(project.id, actualProjectType)));
             fragment.appendChild(createAction('التكلفة', 'calculator', (e) => { 
                 e.stopPropagation(); 
-                toggleProjectCostPopup(project.id, type, card); 
+                toggleProjectCostPopup(project.id, actualProjectType, card); 
             }));
-            
+
             if (type === 'archive' || project.status === 'مكتمل') {
-                const unarchiveBtn = createAction('إلغاء الأرشفة', 'box-open', () => toggleArchiveStatus(project.projectTypeInternal || type, project.id, false));
-                unarchiveBtn.classList.add('archive-btn');
-                fragment.appendChild(unarchiveBtn);
+                // في الأرشيف نعرض: فريق العمل، ملاحظات، الخام
+                fragment.appendChild(createAction('فريق العمل', 'users', () => showProjectTeamModal(project.id, actualProjectType)));
+                fragment.appendChild(createAction('ملاحظات', 'sticky-note', () => showProjectNotesModal(project.id, actualProjectType)));
+                fragment.appendChild(createAction('الخام', 'link', () => openRawLink(project.rawUrl)));
             } else {
-                fragment.appendChild(createAction('فريق العمل', 'users', () => showProjectTeamModal(project.id, type)));
-                fragment.appendChild(createAction('ملاحظات', 'sticky-note', () => showProjectNotesModal(project.id, type)));
-                const archiveBtn = createAction('أرشفة', 'archive', () => toggleArchiveStatus(type, project.id, true), 'danger');
-                fragment.appendChild(archiveBtn);
+                // في المشاريع النشطة نعرض: فريق العمل، ملاحظات، الخام
+                fragment.appendChild(createAction('فريق العمل', 'users', () => showProjectTeamModal(project.id, actualProjectType)));
+                fragment.appendChild(createAction('ملاحظات', 'sticky-note', () => showProjectNotesModal(project.id, actualProjectType)));
+                fragment.appendChild(createAction('الخام', 'link', () => openRawLink(project.rawUrl)));
             }
             actionsContainer.appendChild(fragment);
         }
         // ---[MODIFICATION END]---
 
         function updateProjectEpisodes(projectType, projectId, change) {
-            const project = data[projectType].find(p => p.id === projectId); 
+            // البحث في جميع المشاريع
+            let project = [...data.anime, ...data.series].find(p => p.id === projectId);
             if (!project) return;
+            
+            // تحديد النوع الفعلي للمشروع
+            const actualType = data.anime.some(a => a.id === projectId) ? 'anime' : 'series';
             
             const currentCompleted = project.completedEpisodes || 0;
             const newCompleted = currentCompleted + change;
@@ -2789,7 +2806,7 @@
             const activityDetails = {
                 type: 'EPISODE_PROGRESS',
                 projectId: project.id,
-                projectType: projectType,
+                projectType: actualType,
                 change: change,
                 costChange: costDelta,
                 team: {
@@ -2801,7 +2818,7 @@
             };
             
             logRecentActivity(
-                `تحديث حلقات مشروع (${projectType}) ${project.name}: ${change > 0 ? 'زيادة' : 'نقص'} حلقة (${currentCompleted} ← ${newCompleted})`,
+                `تحديث حلقات مشروع (${actualType}) ${project.name}: ${change > 0 ? 'زيادة' : 'نقص'} حلقة (${currentCompleted} ← ${newCompleted})`,
                 activityDetails
             );
 
@@ -2810,7 +2827,7 @@
             
             saveData().then(success => { 
                 if (success) { 
-                    updateCardInDOM(projectType, projectId, project); 
+                    updateCardInDOM(actualType, projectId, project); 
                     updateAffectedMembersDisplayDOM(affectedMemberIds); 
                     updateDashboard(); 
                     requestAnimationFrame(() => showAlert(`تم تحديث الحلقة بنجاح (${newCompleted})`, 'success', 1500)); 
@@ -3471,83 +3488,6 @@
             finally { setDisabled(PROJECT_CONFIG.series.fetchButtonId, false); toggleVisibility(PROJECT_CONFIG.series.fetchLoaderId, false, false); } 
         }
 
-        function toggleArchiveStatus(type, projectId, archive) {
-            const projectIndex = data[type].findIndex(p => p.id === projectId);
-            if (projectIndex === -1) return;
-
-            const project = data[type][projectIndex];
-
-            if (archive) {
-                if (project.status !== 'مكتمل' && !confirm('هذا المشروع ليس مكتملاً. هل تريد أرشفته وتحديث حالته إلى "مكتمل"؟')) return;
-
-                project.status = 'مكتمل';
-                project.completionDate = project.completionDate || new Date().toISOString();
-                
-                logRecentActivity(`أرشفة مشروع (${type}) ${project.name}`);
-                unsavedChanges = true;
-
-                saveData().then(success => { 
-                    if(success) { 
-                        sortAndLoadData(type, currentSort[type]); 
-                        loadArchivedProjects(getVal('archiveTypeFilter')); 
-                        updateDashboard(); 
-                        requestAnimationFrame(() => showAlert(`تم أرشفة المشروع بنجاح.`, 'success')); 
-                    } else {
-                        unsavedChanges = true; 
-                    }
-                });
-            } else {
-                const title = `إلغاء أرشفة: ${project.name}`;
-                const bodyHtml = `
-                    <p>يرجى اختيار الحالة الجديدة للمشروع بعد إلغاء أرشفته.</p>
-                    <div class="form-group mt-20">
-                        <label for="unarchiveStatusSelect">الحالة الجديدة:</label>
-                        <select id="unarchiveStatusSelect" class="form-control">
-                            <option value="جارٍ">جارٍ</option>
-                            <option value="متوقف">متوقف</option>
-                            <option value="قريباً">قريباً</option>
-                        </select>
-                    </div>
-                `;
-                const footerHtml = `
-                    <button type="button" class="btn btn-primary" onclick="processUnarchive('${type}', '${projectId}')">حفظ وإلغاء الأرشفة</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('instructionsModal')">إلغاء</button>
-                `;
-                showInstructionsModal(title, bodyHtml, footerHtml);
-            }
-        }
-        
-        function processUnarchive(type, projectId) {
-            const projectIndex = data[type].findIndex(p => p.id === projectId);
-            if (projectIndex === -1) return;
-
-            const project = data[type][projectIndex];
-            const newStatus = getVal('unarchiveStatusSelect');
-
-            if (!newStatus || !['جارٍ', 'متوقف', 'قريباً'].includes(newStatus)) {
-                showAlert('يرجى اختيار حالة صالحة.', 'warning');
-                return;
-            }
-
-            project.status = newStatus;
-            project.completionDate = null;
-
-            logRecentActivity(`إلغاء أرشفة مشروع (${type}) ${project.name} -> ${newStatus}`);
-            unsavedChanges = true;
-
-            saveData().then(success => {
-                if(success) {
-                    sortAndLoadData(type, currentSort[type]);
-                    loadArchivedProjects(getVal('archiveTypeFilter'));
-                    updateDashboard();
-                    showAlert(`تم إلغاء أرشفة المشروع بنجاح.`, 'success');
-                } else {
-                    unsavedChanges = true;
-                }
-            });
-            closeModal('instructionsModal');
-        }
-
         function loadArchivedProjects(filterType = 'all') { 
             currentFilteredAndSortedItems.archive = getProcessedItemsForType('archive'); 
             loadDataIntoGrid('archive', currentFilteredAndSortedItems.archive); 
@@ -3597,7 +3537,7 @@
         function showProjectTeamModal(projectId, projectType) { 
             requestAnimationFrame(() => {
                 const modalBody = getEl('projectTeamModalBody'); modalBody.innerHTML = '<div class="spinner"></div>'; 
-                let project = data[projectType]?.find(p => p.id === projectId) || data.anime.find(p => p.id === projectId && p.status === 'مكتمل') || data.series.find(p => p.id === projectId && p.status === 'مكتمل');
+                let project = [...data.anime, ...data.series].find(p => p.id === projectId);
                 if (!project) { modalBody.innerHTML = '<p class="text-center text-muted">لم يتم العثور على المشروع.</p>'; setText('projectTeamModalTitle', 'فريق عمل المشروع'); setStyle('projectTeamModal', 'display', 'block'); return; }
                 setText('projectTeamModalTitle', `فريق عمل: ${project.name}`); let teamHtml = ''; let hasMembers = false;
                 const roles = [{role:'مترجم',id:project.translatorId,price:project.translationPrice,bonus:project.translationBonus}, {role:'مدقق',id:project.editorId,price:project.editingPrice,bonus:project.editingBonus}, {role:'محاكي',id:project.timerId,price:project.timerPrice,bonus:project.timerBonus}, {role:'موقت',id:project.subtitlerId,price:project.subtitlerPrice,bonus:project.subtitlerBonus}];
@@ -3608,10 +3548,12 @@
         
                 function showProjectDetailsModal(projectId, projectType) {
             requestAnimationFrame(() => {
-                const project = data[projectType]?.find(p => p.id === projectId); 
+                const project = [...data.anime, ...data.series].find(p => p.id === projectId); 
                 if (!project) { showAlert('لم يتم العثور على المشروع!', 'danger'); return; }
                 
-                const config = PROJECT_CONFIG[projectType]; 
+                // تحديد نوع المشروع الفعلي
+                const actualType = data.anime.some(a => a.id === projectId) ? 'anime' : 'series';
+                const config = PROJECT_CONFIG[actualType]; 
                 if (!config) { showAlert('نوع مشروع غير صالح!', 'danger'); return; }
                 
                 setText('projectDetailsModalTitle', `تفاصيل: ${project.name}`); 
@@ -3641,7 +3583,7 @@
                 addInfoItem('الحلقات', project.totalEpisodes, false); 
                 addInfoItem(`رابط ${config.externalLinkName}`, project[config.externalLinkProperty], true);
                 
-                if (projectType === 'anime') { 
+                if (actualType === 'anime') { 
                     addInfoItem('النوع', project.animeType, false); 
                     addInfoItem('أول عرض', formatDate(project.premiered), false, String(project.premiered).split('-')[0]); 
                     addInfoItem('الاستوديو', project.studio, false); 
@@ -3704,12 +3646,20 @@
         }
 
         function showProjectNotesModal(projectId, projectType) {
-            const project = data[projectType]?.find(p => p.id === projectId);
+            const project = [...data.anime, ...data.series].find(p => p.id === projectId);
             if (!project) return;
             const notes = project.notes || 'لا توجد ملاحظات داخلية لهذا المشروع.';
             const title = `ملاحظات داخلية: ${project.name}`;
             const footer = `<button type="button" class="btn btn-secondary" onclick="closeModal('instructionsModal')">إغلاق</button>`;
             showInstructionsModal(title, `<p style="white-space: pre-wrap;">${notes}</p>`, footer);
+        }
+
+        function openRawLink(url) {
+            if (url && isValidUrl(url)) {
+                window.open(url, '_blank');
+            } else {
+                showAlert('لم يتم تحديد رابط الملفات الخام لهذا المشروع. يمكنك إضافته من خلال تعديل المشروع.', 'info', 4000);
+            }
         }
 
         function toggleProjectCostPopup(projectId, projectType, cardElement) {
