@@ -257,8 +257,9 @@
         .episode-control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         .episode-control-btn:disabled:hover { background-color: var(--bg-secondary-user); border-color: var(--border-color); transform: none; }
         .project-team-avatars .avatar-group img:hover { transform: scale(1.2); z-index: 1; }
-        .btn-icon { background: none; border: none; color: var(--text-secondary); font-size: 1.5em; cursor: pointer; padding: 4px; border-radius: 50%; transition: background-color 0.2s; }
-        .btn-icon:hover { background-color: rgba(255,255,255,0.1); color: var(--accent-purple); }
+        .btn-icon { background: none; border: none; color: var(--text-secondary); font-size: 1.5em; cursor: pointer; padding: 4px; border-radius: 50%; transition: background-color 0.2s, color 0.3s ease, opacity 0.3s ease; }
+        .btn-icon:hover:not(:disabled) { background-color: rgba(255,255,255,0.1); color: var(--accent-purple); }
+        .btn-icon:disabled { color: #666; cursor: not-allowed; }
 
         .card { background: var(--bg-card-user); border-radius: 12px; box-shadow: var(--shadow); padding: 24px; margin-bottom: 20px; transition: var(--card-transition); border: 1px solid var(--border-color); position: relative; }
         .card:hover { box-shadow: var(--shadow-md); border-color: var(--accent-purple); }
@@ -457,7 +458,6 @@
         @media (max-width: 400px) { .member-card .card-footer { flex-direction: column; gap: 10px; align-items: stretch; } .social-links { justify-content: center; } }
 
         .project-title { font-size: 1.15em; font-weight: 600; margin: 0; color: var(--text-main); line-height: 1.4; overflow: visible; text-overflow: initial; display: block; white-space: normal; word-wrap: break-word; hyphens: auto; min-height: 2.8em; }
-        /* ---[MODIFICATION START]--- Project Card Redesign */
         .project-card .project-header {
             display: flex;
             padding: 18px;
@@ -465,7 +465,6 @@
             align-items: flex-start;
             flex-grow: 1; /* Allow header to take up available space */
         }
-        /* ---[MODIFICATION END]--- */
         .project-poster { position: relative; flex-shrink: 0; width: 90px; height: 135px; }
         .project-poster img { width: 100%; height: 100%; object-fit: cover; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; }
         .project-type-badge { position: absolute; top: 5px; right: 5px; background-color: var(--accent-purple); color: var(--text-main); padding: 2px 6px; border-radius: 4px; font-size: 0.7em; font-weight: 500; }
@@ -477,7 +476,6 @@
         .genre-tag { background-color: var(--bg-secondary-user); color: var(--text-secondary); padding: 2px 6px; border-radius: 10px; font-size: 0.7em; }
         .genre-tag.clickable-meta { cursor: pointer; transition: background-color 0.2s ease, color 0.2s ease; }
         .genre-tag.clickable-meta:hover { background-color: var(--accent-blue); color: var(--text-main); }
-        /* ---[MODIFICATION START]--- Project Card Redesign */
         .project-status-widget {
             display: flex;
             align-items: center;
@@ -493,7 +491,6 @@
             padding: 5px 14px !important;
             border-radius: 15px !important;
         }
-        /* ---[MODIFICATION END]--- */
         .status-indicator { font-weight: 600; padding: 3px 8px; border-radius: 6px; font-size: 0.75em; display: inline-block; white-space: nowrap; }
         .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 0.7em; font-weight: 600; display: flex; align-items: baseline; justify-content: center; }
         .progress-label { font-size: 0.7em; color: var(--text-secondary); margin: 0; }
@@ -619,9 +616,6 @@
             z-index: 2400;
             animation: fadeIn 0.3s ease;
         }
-
-        /* ---[MODIFICATION START]--- Project Card Redesign */
-
 .project-title a {
     color: inherit;
     text-decoration: none;
@@ -644,8 +638,40 @@
             gap: 8px;
             width: 100%;
         }
-        /* ---[MODIFICATION END]--- */
         .project-card-checkbox { position: absolute; top: 10px; right: 10px; width: 22px; height: 22px; cursor: pointer; z-index: 5; accent-color: var(--accent-purple); }
+        /* ---[MODIFICATION START]--- Direct Delete Button Style */
+        .project-card-delete-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 6;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: rgba(239, 68, 68, 0.5);
+            color: white;
+            border: none;
+            font-size: 16px;
+            font-weight: bold;
+            line-height: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+        .project-card:hover .project-card-delete-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .project-card-delete-btn:hover {
+            background-color: var(--accent-red);
+            transform: scale(1.1) rotate(90deg);
+        }
+        #archiveCardGrid .project-card-delete-btn {
+            display: none;
+        }
+        /* ---[MODIFICATION END]--- */
         .action-btn { flex: 1 1 auto; min-width: 60px; padding: 8px 10px; border-radius: 8px; font-size: 0.85em; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; color: var(--text-main); border: 1px solid var(--border-color); text-align: center; background: rgba(255,255,255,0.05); }
         .action-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); transform: translateY(-1px); border-color: var(--accent-blue); }
         .action-btn.danger { background-color: rgba(239, 68, 68, 0.1); border-color: var(--accent-red); }
@@ -653,7 +679,6 @@
         
         #archiveCardGrid .project-actions { flex-wrap: wrap; justify-content: space-between; padding: 10px; }
         #archiveCardGrid .action-btn { flex: 1 1 calc(50% - 4px); min-width: 90px; }
-        /* #archiveCardGrid .archive-btn { order: 1; grid-column: 1 / -1; background: var(--gradient-green); } */ /* MODIFICATION: Removed */
 
         @media (max-width: 450px) {
             .project-card .project-header { padding: 15px; gap: 12px; min-height: auto; flex-direction: column; text-align: center; }
@@ -1744,31 +1769,39 @@
                             <section class="settings-section">
                                 <h3 class="section-title">إنشاء التقارير</h3>
                                 <div class="toolbar flex-wrap gap-15" style="align-items: center;">
-    <div>
-        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">التقارير العامة</h4>
-        <button class="btn btn-primary" onclick="generateReport('projects')"><i class="fas fa-clipboard-list"></i> تقرير حالة المشاريع</button>
-        <button class="btn btn-primary" onclick="generateReport('financial')"><i class="fas fa-dollar-sign"></i> تقرير مالي شامل</button>
-    </div>
-    <div style="border-right: 2px solid var(--border-color); padding-right: 15px; margin-right: 15px;">
-        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">التقارير المخصصة</h4>
-        <select id="reportMemberSelect" class="form-control" onchange="generateReport('memberDetailed')" style="min-width: 250px; display: inline-block; width: auto;"> 
-            <option value="">اختر عضوًا لتقرير مفصل...</option>
-        </select>
-    </div>
-    <div style="border-right: 2px solid var(--border-color); padding-right: 15px;">
-        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">التقرير المالي الشهري للمدفوعات</h4>
-        <div class="flex-wrap gap-10">
-            <select id="reportYearSelect" class="form-control" style="width: 120px;"></select>
-            <select id="reportMonthSelect" class="form-control" style="width: 150px;"></select>
-            <button class="btn btn-primary" onclick="generateNewMonthlyReport()"><i class="fas fa-cogs"></i> إنشاء التقرير</button>
+                                    <div>
+                                        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">التقارير العامة</h4>
+                                        <button class="btn btn-primary" onclick="generateReport('projects')"><i class="fas fa-clipboard-list"></i> تقرير حالة المشاريع</button>
+                                        <button class="btn btn-primary" onclick="generateReport('financial')"><i class="fas fa-dollar-sign"></i> تقرير مالي شامل</button>
+                                    </div>
+                                    <div style="border-right: 2px solid var(--border-color); padding-right: 15px; margin-right: 15px;">
+                                        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">التقارير المخصصة</h4>
+                                        <select id="reportMemberSelect" class="form-control" onchange="generateReport('memberDetailed')" style="min-width: 250px; display: inline-block; width: auto;"> 
+                                            <option value="">اختر عضوًا لتقرير مفصل...</option>
+                                        </select>
+                                    </div>
+                                    <!-- ---[MODIFICATION START]--- New Report Controls -->
+                                    <div style="border-right: 2px solid var(--border-color); padding-right: 15px;">
+    <h4 style="margin-bottom: 10px; color: var(--text-secondary);">تقرير فترة الدفع</h4>
+    <div class="flex-wrap gap-10" style="align-items: flex-end;">
+        <div class="form-group" style="margin-bottom:0;">
+            <label for="reportStartDate" style="font-size: 0.9em; margin-bottom: 4px;">من تاريخ</label>
+            <input type="date" id="reportStartDate" class="form-control" style="width: 180px;">
         </div>
-    </div>
-    <div style="margin-right: auto;">
-        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">إجراءات التقرير</h4>
-        <button class="btn btn-success" onclick="printReport()"><i class="fas fa-print"></i> طباعة</button>
-        <button class="btn btn-warning" onclick="saveReportAsHTML()"><i class="fas fa-save"></i> حفظ HTML</button>
+        <div class="form-group" style="margin-bottom:0;">
+            <label for="reportEndDate" style="font-size: 0.9em; margin-bottom: 4px;">إلى تاريخ</label>
+            <input type="date" id="reportEndDate" class="form-control" style="width: 180px;">
+        </div>
+        <button class="btn btn-primary" onclick="generateNewBillingReport()"><i class="fas fa-file-invoice-dollar"></i> إنشاء التقرير</button>
     </div>
 </div>
+                                    <!-- ---[MODIFICATION END]--- -->
+                                    <div style="margin-right: auto;">
+                                        <h4 style="margin-bottom: 10px; color: var(--text-secondary);">إجراءات التقرير</h4>
+                                        <button class="btn btn-success" onclick="printReport()"><i class="fas fa-print"></i> طباعة</button>
+                                        <button class="btn btn-warning" onclick="saveReportAsHTML()"><i class="fas fa-save"></i> حفظ HTML</button>
+                                    </div>
+                                </div>
                                 <div id="reportContent" class="mt-20"> <p class="text-center text-muted">اختر نوع التقرير لعرضه.</p> </div>
                             </section>
                         </section>
@@ -1791,6 +1824,8 @@
                 <a href="#" onclick="importData('cloud')"><i class="fas fa-cloud-download-alt"></i> من السحابة</a>
             </div>
         </div>
+        
+        <button id="globalUndoBtn" class="btn-icon" title="تراجع" onclick="handleUndo()" disabled><i class="fas fa-undo"></i></button>
 
         <div class="dropdown">
             <button id="globalExportBtn" class="btn-icon" title="تصدير JSON"><i class="fas fa-file-export"></i></button>
@@ -1905,9 +1940,9 @@
         </article>
     </template>
     
-    <!-- ---[MODIFICATION START]--- Project Card Template Redesign -->
     <template id="projectCardTemplate">
         <article class="project-card card" style="padding:0; overflow:hidden;">
+            <button class="project-card-delete-btn" title="حذف المشروع مباشرة">×</button>
             <input type="checkbox" class="project-card-checkbox">
             <div class="project-header">
                 <div class="project-poster-wrapper" style="position: relative; flex-shrink: 0;">
@@ -1936,7 +1971,6 @@
             </div>
         </article>
     </template>
-    <!-- ---[MODIFICATION END]--- -->
 
     
     <template id="memberFormTemplate">
@@ -2030,6 +2064,9 @@
 
         const DB_NAME = "ReviveSubsDB", STORE_NAME = "appDataStore", DB_VERSION = 2, MAIN_DATA_KEY = "mainApplicationData";
         let data = { version: "3.0.0" };
+        
+        let undoStack = [];
+        const MAX_UNDO_STACK_SIZE = 20;
 
         const PROJECT_BASE_CONFIG = {
             formFields: ['projectStatus', 'totalEpisodes', 'completedEpisodesProject', 'projectTranslator', 'projectEditor', 'projectTimer', 'projectSubtitler', 'translationPrice', 'editingPrice', 'timerPrice', 'subtitlerPrice', 'translationBonus', 'editingBonus', 'timerBonus', 'subtitlerBonus', 'rawUrl'],
@@ -2185,6 +2222,131 @@
                 });
             } catch (error) { console.error("Failed to open DB for saving:", error); requestAnimationFrame(() => showAlert('فشل فتح قاعدة البيانات للحفظ!', 'danger')); return Promise.resolve(false); }
         }
+        
+        function pushToUndoStack(actionType, dataBefore, description) {
+            undoStack.push({ actionType, dataBefore, description, timestamp: new Date() });
+            if (undoStack.length > MAX_UNDO_STACK_SIZE) {
+                undoStack.shift();
+            }
+            updateUndoButtonState();
+        }
+
+        function updateUndoButtonState() {
+            const undoBtn = getEl('globalUndoBtn');
+            if (undoBtn) {
+                undoBtn.disabled = undoStack.length === 0;
+            }
+        }
+
+        async function handleUndo() {
+    const lastAction = undoStack.pop();
+    if (!lastAction) return;
+
+    const { actionType, dataBefore, description } = lastAction;
+    let success = false;
+    let undoDescription = '';
+
+    try {
+        let undoLogDetails = null; // متغير لتخزين تفاصيل سجل التراجع
+
+        switch (actionType) {
+            case 'ADD_MEMBER':
+                data.members = data.members.filter(m => m.id !== dataBefore.id);
+                undoDescription = `إضافة العضو ${description}`;
+                break;
+            case 'UPDATE_MEMBER':
+                const memberUpdateIndex = data.members.findIndex(m => m.id === dataBefore.member.id);
+                if (memberUpdateIndex > -1) data.members[memberUpdateIndex] = dataBefore.member;
+                undoDescription = `تعديل العضو ${description}`;
+                break;
+            case 'DELETE_MEMBER':
+                data.members.push(...dataBefore.items);
+                undoDescription = `حذف ${description}`;
+                break;
+
+            case 'ADD_PROJECT':
+                data[dataBefore.type] = data[dataBefore.type].filter(p => p.id !== dataBefore.id);
+                undoDescription = `إضافة المشروع ${description}`;
+                break;
+            case 'UPDATE_PROJECT':
+                const projectUpdateIndex = data[dataBefore.project.type].findIndex(p => p.id === dataBefore.project.data.id);
+                if (projectUpdateIndex > -1) data[dataBefore.project.type][projectUpdateIndex] = dataBefore.project.data;
+                undoDescription = `تعديل المشروع ${description}`;
+                break;
+            case 'DELETE_PROJECT':
+                data[dataBefore.type].push(...dataBefore.items);
+                undoDescription = `حذف ${description}`;
+                break;
+            case 'DIRECT_DELETE_PROJECT':
+                data[dataBefore.type].push(dataBefore.item);
+                undoDescription = `حذف المشروع ${description}`;
+                break;
+
+            case 'UPDATE_EPISODES':
+                const originalProject = data[dataBefore.type].find(p => p.id === dataBefore.project.id);
+                const originalCompleted = originalProject ? originalProject.completedEpisodes : 0;
+                
+                const projIndex = data[dataBefore.type].findIndex(p => p.id === dataBefore.project.id);
+                if(projIndex > -1) data[dataBefore.type][projIndex] = dataBefore.project;
+
+                const newCompleted = dataBefore.project.completedEpisodes;
+                const change = newCompleted - originalCompleted;
+                
+                // إنشاء سجل تراجع معاكس للسجل الأصلي
+                if (change !== 0) {
+                    undoLogDetails = {
+                        type: 'EPISODE_PROGRESS',
+                        projectId: dataBefore.project.id,
+                        projectType: dataBefore.type,
+                        change: change, // التغيير سيكون سالبًا إذا كان الإجراء الأصلي زيادة، وموجبًا إذا كان حذفًا
+                        episodeNumber: originalCompleted, // الرقم الذي تم تغييره
+                        costChange: (
+                            (dataBefore.project.translationPrice || 0) + 
+                            (dataBefore.project.editingPrice || 0) + 
+                            (dataBefore.project.timerPrice || 0) + 
+                            (dataBefore.project.subtitlerPrice || 0)
+                        ) * change,
+                        team: {
+                            translator: { id: dataBefore.project.translatorId, price: dataBefore.project.translationPrice || 0 },
+                            editor: { id: dataBefore.project.editorId, price: dataBefore.project.editingPrice || 0 },
+                            timer: { id: dataBefore.project.timerId, price: dataBefore.project.timerPrice || 0 },
+                            subtitler: { id: dataBefore.project.subtitlerId, price: dataBefore.project.subtitlerPrice || 0 },
+                        }
+                    };
+                }
+                
+                undoDescription = `تحديث حلقات ${description}`;
+                break;
+            
+            case 'RECORD_PAYMENT':
+                const paymentUndoIndex = data.members.findIndex(m => m.id === dataBefore.member.id);
+                if (paymentUndoIndex > -1) {
+                    data.members[paymentUndoIndex] = dataBefore.member; 
+                }
+                undoDescription = `تسجيل ${description}`;
+                break;
+        }
+        
+        recalculateAllMemberData();
+        
+        // إضافة سجل التراجع إلى سجل الأنشطة العام
+        if (undoLogDetails) {
+            logRecentActivity(`(تراجع) ${undoDescription}`, undoLogDetails);
+        }
+
+        success = await saveData();
+    } catch (err) {
+        console.error("Error during undo operation:", err);
+        showAlert('حدث خطأ أثناء عملية التراجع.', 'danger');
+        undoStack.push(lastAction); // Push it back if it failed
+    }
+
+    if (success) {
+        showAlert(`تم التراجع عن: ${undoDescription}`, 'info', 4000);
+        updateAllDisplays();
+    }
+    updateUndoButtonState();
+}
 
         document.addEventListener('DOMContentLoaded', async function() {
             initializeApp();
@@ -2234,6 +2396,7 @@
             
             showProjectSubView('animeProjectsView', document.querySelector('.sub-nav-tab[onclick*="animeProjectsView"]'));
             ['members', 'anime', 'series'].forEach(type => updateDeleteButtonText(type));
+            updateUndoButtonState();
         }
 
         function updateAllDisplays() {
@@ -2663,20 +2826,27 @@
             checkbox.checked = selectedItems.members.has(member.id);
         }
         
-        // ---[MODIFICATION START]--- Project Card Population Logic
         function populateProjectCard(card, project, type) { 
             const config = PROJECT_CONFIG[type]; 
             if (!config) return;
             card.dataset.type = type;
 
             const checkbox = card.querySelector('.project-card-checkbox');
+            const deleteBtn = card.querySelector('.project-card-delete-btn');
+            
             if (type === 'archive') {
                 if(checkbox) checkbox.style.display = 'none';
+                if(deleteBtn) deleteBtn.style.display = 'none';
             } else {
                 if(checkbox) {
                     checkbox.style.display = 'block';
                     checkbox.onchange = () => toggleItemSelection(type, project.id);
                     checkbox.checked = selectedItems[type]?.has(project.id) || false;
+                }
+                if(deleteBtn) {
+                    deleteBtn.style.display = ''; // Reset display property
+                    const actualProjectType = data.anime.some(a => a.id === project.id) ? 'anime' : 'series';
+                    deleteBtn.onclick = (e) => { e.stopPropagation(); directDeleteProject(project.id, actualProjectType, project.name); };
                 }
             }
             
@@ -2693,16 +2863,13 @@
             typeBadge.onclick = () => quickSearch(typeText);
             
             const titleElement = card.querySelector('.project-title');
-const projectUrl = project[config.externalLinkProperty];
+            const projectUrl = project[config.externalLinkProperty];
 
-// التحقق من وجود رابط صالح قبل إنشاء الوسم
-if (projectUrl && isValidUrl(projectUrl)) {
-    // إذا كان هناك رابط، اجعل العنوان بأكمله رابطًا
-    titleElement.innerHTML = `<a href="${projectUrl}" target="_blank" rel="noopener noreferrer">${project.name}</a>`;
-} else {
-    // إذا لم يكن هناك رابط، اعرض العنوان كنص عادي
-    titleElement.textContent = project.name;
-}
+            if (projectUrl && isValidUrl(projectUrl)) {
+                titleElement.innerHTML = `<a href="${projectUrl}" target="_blank" rel="noopener noreferrer">${project.name}</a>`;
+            } else {
+                titleElement.textContent = project.name;
+            }
 
             let metaHtml = '';
             const addMeta = (icon, value, searchTerm = null) => { 
@@ -2787,7 +2954,6 @@ if (projectUrl && isValidUrl(projectUrl)) {
 
             const fragment = document.createDocumentFragment();
 
-            // تحديد النوع الفعلي للمشروع
             const actualProjectType = data.anime.some(a => a.id === project.id) ? 'anime' : 'series';
 
             fragment.appendChild(createAction('تعديل', 'edit', () => showEntityModal(actualProjectType, project.id)));
@@ -2798,33 +2964,29 @@ if (projectUrl && isValidUrl(projectUrl)) {
             }));
 
             if (type === 'archive' || project.status === 'مكتمل') {
-                // في الأرشيف نعرض: فريق العمل، ملاحظات، الخام
                 fragment.appendChild(createAction('فريق العمل', 'users', () => showProjectTeamModal(project.id, actualProjectType)));
                 fragment.appendChild(createAction('ملاحظات', 'sticky-note', () => showProjectNotesModal(project.id, actualProjectType)));
                 fragment.appendChild(createAction('الخام', 'link', () => openRawLink(project.rawUrl)));
             } else {
-                // في المشاريع النشطة نعرض: فريق العمل، ملاحظات، الخام
                 fragment.appendChild(createAction('فريق العمل', 'users', () => showProjectTeamModal(project.id, actualProjectType)));
                 fragment.appendChild(createAction('ملاحظات', 'sticky-note', () => showProjectNotesModal(project.id, actualProjectType)));
                 fragment.appendChild(createAction('الخام', 'link', () => openRawLink(project.rawUrl)));
             }
             actionsContainer.appendChild(fragment);
         }
-        // ---[MODIFICATION END]---
 
-        function updateProjectEpisodes(projectType, projectId, change) {
-            // البحث في جميع المشاريع
+        async function updateProjectEpisodes(projectType, projectId, change) {
             let project = [...data.anime, ...data.series].find(p => p.id === projectId);
             if (!project) return;
-            
-            // تحديد النوع الفعلي للمشروع
             const actualType = data.anime.some(a => a.id === projectId) ? 'anime' : 'series';
             
             const currentCompleted = project.completedEpisodes || 0;
             const newCompleted = currentCompleted + change;
             const totalEpisodes = project.totalEpisodes || 0;
-            
             if (newCompleted < 0 || (totalEpisodes > 0 && newCompleted > totalEpisodes)) return;
+
+            const projectBefore = JSON.parse(JSON.stringify(project));
+            pushToUndoStack('UPDATE_EPISODES', { type: actualType, project: projectBefore }, `'${project.name}'`);
             
             project.completedEpisodes = newCompleted;
             project.totalCost = (project.completedEpisodes * (project.translationPrice || 0)) + (project.translationBonus || 0) + 
@@ -2834,20 +2996,10 @@ if (projectUrl && isValidUrl(projectUrl)) {
             
             const affectedMemberIds = new Set([project.translatorId, project.editorId, project.timerId, project.subtitlerId].filter(Boolean));
             
-            const costDelta = (
-                (project.translationPrice || 0) + 
-                (project.editingPrice || 0) + 
-                (project.timerPrice || 0) + 
-                (project.subtitlerPrice || 0)
-            ) * change;
-
+            const costDelta = ((project.translationPrice || 0) + (project.editingPrice || 0) + (project.timerPrice || 0) + (project.subtitlerPrice || 0)) * change;
             const activityDetails = {
-                type: 'EPISODE_PROGRESS',
-                projectId: project.id,
-                projectType: actualType,
-                change: change,
-                episodeNumber: newCompleted,
-                costChange: costDelta,
+                type: 'EPISODE_PROGRESS', projectId: project.id, projectType: actualType,
+                change: change, episodeNumber: newCompleted, costChange: costDelta,
                 team: {
                     translator: { id: project.translatorId, price: project.translationPrice || 0 },
                     editor: { id: project.editorId, price: project.editingPrice || 0 },
@@ -2856,24 +3008,22 @@ if (projectUrl && isValidUrl(projectUrl)) {
                 }
             };
             
-            logRecentActivity(
-                `تحديث حلقات مشروع (${actualType}) ${project.name}: ${change > 0 ? 'زيادة' : 'نقص'} حلقة (${currentCompleted} ← ${newCompleted})`,
-                activityDetails
-            );
+            logRecentActivity(`تحديث حلقات مشروع (${actualType}) ${project.name}: ${change > 0 ? 'زيادة' : 'نقص'} حلقة (${currentCompleted} ← ${newCompleted})`, activityDetails);
 
             unsavedChanges = true; 
             recalculateSpecificMembersData(affectedMemberIds);
             
-            saveData().then(success => { 
-                if (success) { 
-                    updateCardInDOM(actualType, projectId, project); 
-                    updateAffectedMembersDisplayDOM(affectedMemberIds); 
-                    updateDashboard(); 
-                    requestAnimationFrame(() => showAlert(`تم تحديث الحلقة بنجاح (${newCompleted})`, 'success', 1500)); 
-                } else { 
-                    unsavedChanges = true; 
-                } 
-            });
+            const success = await saveData();
+            if (success) { 
+                updateCardInDOM(actualType, projectId, project); 
+                updateAffectedMembersDisplayDOM(affectedMemberIds); 
+                updateDashboard(); 
+                requestAnimationFrame(() => showAlert(`تم تحديث الحلقة بنجاح (${newCompleted})`, 'success', 1500)); 
+            } else { 
+                unsavedChanges = true; 
+                undoStack.pop();
+                updateUndoButtonState();
+            }
         }
 
         function updateMemberDropdowns() {
@@ -3075,6 +3225,8 @@ if (projectUrl && isValidUrl(projectUrl)) {
             if (memberId) {
                 const index = data.members.findIndex(m => m.id === memberId);
                 if (index === -1) { showAlert('خطأ: لم يتم العثور على العضو المراد تعديله.', 'danger'); return; }
+                const memberBefore = JSON.parse(JSON.stringify(data.members[index]));
+                pushToUndoStack('UPDATE_MEMBER', { member: memberBefore }, `'${memberBefore.name}'`);
                 data.members[index] = { ...data.members[index], ...memberData };
                 savedEntityData = data.members[index];
             } else {
@@ -3090,6 +3242,7 @@ if (projectUrl && isValidUrl(projectUrl)) {
                     projectSubtitledEpisodes: 0,
                 };
                 data.members.push(savedEntityData);
+                pushToUndoStack('ADD_MEMBER', { id: savedEntityData.id }, `'${savedEntityData.name}'`);
             }
             
             recalculateSpecificMembersData(new Set([savedEntityData.id]));
@@ -3108,6 +3261,8 @@ if (projectUrl && isValidUrl(projectUrl)) {
             } else {
                 showAlert('فشل في حفظ البيانات. يرجى المحاولة مرة أخرى.', 'danger');
                 unsavedChanges = true;
+                undoStack.pop();
+                updateUndoButtonState();
             }
         }
         
@@ -3168,6 +3323,8 @@ if (projectUrl && isValidUrl(projectUrl)) {
             if (projectId) {
                 const index = data[type].findIndex(p => p.id === projectId);
                 if (index === -1) { showAlert('خطأ: لم يتم العثور على المشروع.', 'danger'); return; }
+                const projectBefore = JSON.parse(JSON.stringify(data[type][index]));
+                pushToUndoStack('UPDATE_PROJECT', { project: { type: type, data: projectBefore } }, `'${projectBefore.name}'`);
                 const existingProject = data[type][index];
                 oldProjectAssignments = { translatorId: existingProject.translatorId, editorId: existingProject.editorId, timerId: existingProject.timerId, subtitlerId: existingProject.subtitlerId };
                 Object.values(oldProjectAssignments).forEach(id => { if (id) affectedMemberIds.add(id); });
@@ -3179,6 +3336,7 @@ if (projectUrl && isValidUrl(projectUrl)) {
                 savedEntityData = { ...projectData, id: generateUniqueId(), createdDate: new Date().toISOString() };
                 if (projectData.status === 'مكتمل') savedEntityData.completionDate = new Date().toISOString();
                 data[type].push(savedEntityData);
+                pushToUndoStack('ADD_PROJECT', { type: type, id: savedEntityData.id }, `'${savedEntityData.name}'`);
             }
             Object.values({ translatorId: savedEntityData.translatorId, editorId: savedEntityData.editorId, timerId: savedEntityData.timerId, subtitlerId: savedEntityData.subtitlerId }).forEach(id => { if (id) affectedMemberIds.add(id); });
             recalculateSpecificMembersData(affectedMemberIds);
@@ -3199,6 +3357,8 @@ if (projectUrl && isValidUrl(projectUrl)) {
             } else {
                 showAlert('فشل في حفظ البيانات. يرجى المحاولة مرة أخرى.', 'danger');
                 unsavedChanges = true;
+                undoStack.pop();
+                updateUndoButtonState();
             }
         }
 
@@ -3320,18 +3480,65 @@ if (projectUrl && isValidUrl(projectUrl)) {
             const btn = document.querySelector(type === 'members' ? '#members .toolbar .btn-danger' : (type === 'anime' ? '#animeProjectsView .toolbar .btn-danger' : '#seriesProjectsView .toolbar .btn-danger'));
             if (btn) btn.innerHTML = `<i class="fas fa-trash-alt"></i> حذف المحدد ${count > 0 ? `(${count})` : ''}`;
         }
-        function deleteSelected(type) { 
+
+        async function deleteSelected(type) {
             if(!selectedItems[type] || selectedItems[type].size === 0){requestAnimationFrame(() => showAlert('يرجى تحديد عناصر للحذف أولاً.','warning'));return;}
             if(confirm(`هل أنت متأكد من حذف ${selectedItems[type].size} عنصر/عناصر محددة؟`)){
-                const idsToDelete = new Set(selectedItems[type]), deletedNames = [];
-                data[type] = data[type].filter(item => { if (idsToDelete.has(item.id)) { deletedNames.push(item.name); return false; } return true; });
-                selectedItems[type].clear(); updateDeleteButtonText(type);
-                const conf = PROJECT_CONFIG[type]; let masterCbId = conf ? conf.selectAllCheckboxId : (type === 'members' ? 'selectAllMembersCard' : null); if (masterCbId) { const mCb=getEl(masterCbId); if(mCb){mCb.checked=false;mCb.indeterminate=false;} }
-                logRecentActivity(`حذف متعدد ${type}: ${deletedNames.join(', ')}`);
+                const idsToDelete = new Set(selectedItems[type]);
+                const itemsToDelete = data[type].filter(item => idsToDelete.has(item.id));
+                pushToUndoStack(type === 'members' ? 'DELETE_MEMBER' : 'DELETE_PROJECT', { type: type, items: JSON.parse(JSON.stringify(itemsToDelete)) }, `${itemsToDelete.length} عنصر/عناصر من قسم ${type}`);
+                
+                data[type] = data[type].filter(item => !idsToDelete.has(item.id));
+                selectedItems[type].clear();
+                updateDeleteButtonText(type);
+                
+                const conf = PROJECT_CONFIG[type];
+                let masterCbId = conf ? conf.selectAllCheckboxId : (type === 'members' ? 'selectAllMembersCard' : null);
+                if (masterCbId) { const mCb=getEl(masterCbId); if(mCb){mCb.checked=false;mCb.indeterminate=false;} }
+                
+                logRecentActivity(`حذف متعدد (${type}): ${itemsToDelete.map(i => i.name).join(', ')}`);
                 unsavedChanges = true;
+
                 if(type === 'members'){ const affectedPIds = new Set(); [data.anime, data.series].forEach(pList => pList.forEach(p => { let ch=false; if(idsToDelete.has(p.translatorId)){p.translatorId=null;ch=true;} if(idsToDelete.has(p.editorId)){p.editorId=null;ch=true;} if(idsToDelete.has(p.timerId)){p.timerId=null;ch=true;} if(idsToDelete.has(p.subtitlerId)){p.subtitlerId=null;ch=true;} if(ch)affectedPIds.add(p.id); })); affectedPIds.forEach(pId => { let p=data.anime.find(pr=>pr.id===pId)||data.series.find(pr=>pr.id===pId); if(p){p.totalCost=(p.completedEpisodes*(p.translationPrice||0))+(p.translationBonus||0)+(p.completedEpisodes*(p.editingPrice||0))+(p.editingBonus||0)+(p.completedEpisodes*(p.timerPrice||0))+(p.timerBonus||0)+(p.completedEpisodes*(p.subtitlerPrice||0))+(p.subtitlerBonus||0);const pTypeDOM=data.anime.some(a=>a.id===pId)?'anime':'series';updateCardInDOM(pTypeDOM,pId,p);} }); sortAndLoadData('members', currentSort.members); updateMemberDropdowns(); } 
                 else sortAndLoadData(type, currentSort[type]); 
-                recalculateAllMemberData(); saveData().then(s => { if(!s) unsavedChanges = true; }); updateDashboard(); requestAnimationFrame(() => showAlert(`تم حذف العناصر المحددة بنجاح.`,'success'));
+                
+                recalculateAllMemberData();
+                const success = await saveData();
+                if(!success) { unsavedChanges = true; undoStack.pop(); updateUndoButtonState(); }
+                
+                updateDashboard();
+                requestAnimationFrame(() => showAlert(`تم حذف العناصر المحددة بنجاح.`,'success'));
+            }
+        }
+        
+        async function directDeleteProject(projectId, projectType, projectName) {
+            if (confirm(`هل أنت متأكد من حذف المشروع: "${projectName}"؟`)) {
+                const index = data[projectType].findIndex(p => p.id === projectId);
+                if (index === -1) {
+                    showAlert('لم يتم العثور على المشروع.', 'danger');
+                    return;
+                }
+
+                const itemToDelete = data[projectType][index];
+                pushToUndoStack('DIRECT_DELETE_PROJECT', { type: projectType, item: JSON.parse(JSON.stringify(itemToDelete)) }, `'${projectName}'`);
+
+                data[projectType].splice(index, 1);
+
+                logRecentActivity(`حذف مشروع (${projectType}): ${projectName}`);
+                unsavedChanges = true;
+                recalculateAllMemberData();
+                const success = await saveData();
+
+                if (success) {
+                    showAlert(`تم حذف المشروع "${projectName}" بنجاح.`, 'success');
+                    const card = document.querySelector(`.project-card[data-id="${projectId}"]`);
+                    if(card) card.style.animation = 'fadeOut 0.4s ease forwards';
+                    setTimeout(() => { if(card) card.remove(); updateAllDisplays(); }, 400);
+                } else {
+                    unsavedChanges = true;
+                    undoStack.pop();
+                    updateUndoButtonState();
+                }
             }
         }
 
@@ -3585,12 +3792,11 @@ if (projectUrl && isValidUrl(projectUrl)) {
             });
         }
         
-                function showProjectDetailsModal(projectId, projectType) {
+        function showProjectDetailsModal(projectId, projectType) {
             requestAnimationFrame(() => {
                 const project = [...data.anime, ...data.series].find(p => p.id === projectId); 
                 if (!project) { showAlert('لم يتم العثور على المشروع!', 'danger'); return; }
                 
-                // تحديد نوع المشروع الفعلي
                 const actualType = data.anime.some(a => a.id === projectId) ? 'anime' : 'series';
                 const config = PROJECT_CONFIG[actualType]; 
                 if (!config) { showAlert('نوع مشروع غير صالح!', 'danger'); return; }
@@ -3651,7 +3857,7 @@ if (projectUrl && isValidUrl(projectUrl)) {
                     addInfoItem('سنة أول عرض', project.seriesYear, false); 
                     addInfoItem('الشبكة', project.seriesNetwork, false); 
                     
-                                        if (project.seriesGenres && project.seriesGenres.length > 0) {
+                    if (project.seriesGenres && project.seriesGenres.length > 0) {
                         extInfo += '<div class="info-item"><label>التصنيفات:</label> <span>';
                         extInfo += project.seriesGenres.map(g => 
                             `<span class="info-genre-tag" onclick="closeModal('projectDetailsModal'); quickSearch('${String(g).replace(/'/g, "\\'")}')">${g}</span>`
@@ -3726,7 +3932,7 @@ if (projectUrl && isValidUrl(projectUrl)) {
             if (popup.classList.contains('hidden')) {
                 const contentDiv = popup.querySelector('.cost-popup-content');
                 
-                                const completedEps = project.completedEpisodes || 0;
+                const completedEps = project.completedEpisodes || 0;
                 const totalEps = (project.totalEpisodes > 0) ? project.totalEpisodes : completedEps;
                 const costPerEpisode = (project.translationPrice || 0) + (project.editingPrice || 0) + 
                                       (project.timerPrice || 0) + (project.subtitlerPrice || 0);
@@ -3955,9 +4161,6 @@ if (projectUrl && isValidUrl(projectUrl)) {
                 if (!reportContentEl) return;
 
                 switch (type) {
-                    case 'monthly':
-                        html = generateMonthlyReport(new Date());
-                        break;
                     case 'projects':
                         html = generateProjectsReport();
                         break;
@@ -4041,96 +4244,6 @@ if (projectUrl && isValidUrl(projectUrl)) {
             return html;
         }
         
-        function generateMonthlyReport(date) {
-            const month = date.getMonth();
-            const year = date.getFullYear();
-            const monthName = date.toLocaleDateString('ar-SA', { month: 'long', year: 'numeric' });
-            
-            let html = `<div class="report-header"><h3>التقرير الشهري لـ ${monthName}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`;
-
-            const monthlyLogs = (data.recentActivityLog || []).filter(log => {
-                const logDate = new Date(log.timestamp);
-                return log.details && log.details.type === 'EPISODE_PROGRESS' &&
-                       logDate.getMonth() === month &&
-                       logDate.getFullYear() === year;
-            });
-
-            if (monthlyLogs.length === 0) {
-                html += `<div class="report-section"><p class="text-muted">لم يتم تسجيل أي نشاط لإنجاز الحلقات في هذا الشهر.</p></div>`;
-                return html;
-            }
-
-            const projectActivity = new Map();
-            const memberEarnings = new Map();
-            let totalEpisodeChange = 0;
-            let totalCostChange = 0;
-
-            monthlyLogs.forEach(log => {
-                const details = log.details;
-                const project = [...data.anime, ...data.series].find(p => p.id === details.projectId);
-                if (!project) return;
-
-                totalEpisodeChange += details.change;
-                totalCostChange += details.costChange;
-
-                if (!projectActivity.has(project.id)) {
-                    projectActivity.set(project.id, { project, netEpisodes: 0, netCost: 0 });
-                }
-                const activity = projectActivity.get(project.id);
-                activity.netEpisodes += details.change;
-                activity.netCost += details.costChange;
-
-                Object.values(details.team).forEach(roleInfo => {
-                    if (roleInfo.id) {
-                        if (!memberEarnings.has(roleInfo.id)) {
-                            memberEarnings.set(roleInfo.id, { member: data.members.find(m=>m.id === roleInfo.id), earnings: 0 });
-                        }
-                        const memberData = memberEarnings.get(roleInfo.id);
-                        if(memberData.member) {
-                           memberData.earnings += (roleInfo.price || 0) * details.change;
-                        }
-                    }
-                });
-            });
-            
-            const activeProjectsCount = Array.from(projectActivity.values()).filter(activity => activity.netEpisodes !== 0).length;
-
-            html += `<div class="report-section"><h4><i class="fas fa-chart-line"></i> ملخص الشهر</h4><ul>`;
-            html += `<li>صافي الحلقات المنجزة هذا الشهر: <strong>${totalEpisodeChange}</strong></li>`;
-            html += `<li>صافي التكلفة المترتبة هذا الشهر: <strong class="${getMoneyClass(totalCostChange)}">${formatMoney(totalCostChange)}</strong></li>`;
-            html += `<li>عدد المشاريع النشطة هذا الشهر: <strong>${activeProjectsCount}</strong></li>`;
-            html += `</ul></div>`;
-
-            html += `<div class="report-section"><h4><i class="fas fa-tasks"></i> تفاصيل نشاط المشاريع هذا الشهر</h4>`;
-            const netProjectActivities = Array.from(projectActivity.values()).filter(activity => activity.netEpisodes !== 0);
-            if (netProjectActivities.length > 0) {
-                html += `<div class="table-container"><table><thead><tr><th>المشروع</th><th>النوع</th><th>صافي الحلقات</th><th>صافي التكلفة</th></tr></thead><tbody>`;
-                netProjectActivities.forEach(activity => {
-                    const type = activity.project.projectTypeInternal || (data.anime.some(a=>a.id === activity.project.id) ? 'أنمي' : 'مسلسل');
-                    html += `<tr><td>${activity.project.name}</td><td>${type}</td><td>${activity.netEpisodes > 0 ? '+' : ''}${activity.netEpisodes}</td><td class="${getMoneyClass(activity.netCost)}">${formatMoney(activity.netCost)}</td></tr>`;
-                });
-                html += `</tbody></table></div>`;
-            } else {
-                html += `<p class="text-muted">لم يتم تسجيل أي نشاط صافي على المشاريع هذا الشهر.</p>`;
-            }
-            html += `</div>`;
-            
-            html += `<div class="report-section"><h4><i class="fas fa-users-cog"></i> تفاصيل أرباح الأعضاء هذا الشهر</h4>`;
-            const earningMembers = Array.from(memberEarnings.values()).filter(m => m.earnings !== 0);
-            if (earningMembers.length > 0) {
-                 html += `<div class="table-container"><table><thead><tr><th>العضو</th><th>صافي الأرباح</th></tr></thead><tbody>`;
-                 earningMembers.forEach(earner => {
-                    html += `<tr><td>${earner.member.name}</td><td class="${getMoneyClass(earner.earnings)}">${formatMoney(earner.earnings)}</td></tr>`;
-                 });
-                 html += `</tbody></table></div>`;
-            } else {
-                html += `<p class="text-muted">لم يتم تسجيل أرباح لأي عضو هذا الشهر.</p>`;
-            }
-            html += `</div>`;
-
-            return html;
-        }
-
         function generateProjectsReport() {
             let html = `<div class="report-header"><h3>تقرير حالة المشاريع</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`;
             const projectsByStatus = {
@@ -4258,7 +4371,7 @@ if (projectUrl && isValidUrl(projectUrl)) {
             requestAnimationFrame(() => { 
                 updateHeaderSocialLinks(); 
                 populateMemberReportDropdown();
-                                populateMonthYearSelectors(); 
+                populateBillingCycleDates();
             }); 
         }
 
@@ -4307,175 +4420,205 @@ if (projectUrl && isValidUrl(projectUrl)) {
             
             return issues.length === 0;
         }
-// ====== قسم التقرير المالي الشهري الجديد ======
 
-// هذه الدالة ستقوم بتعبئة قوائم اختيار السنة والشهر
-function populateMonthYearSelectors() {
-    const yearSelect = getEl('reportYearSelect');
-    const monthSelect = getEl('reportMonthSelect');
-    if (!yearSelect || !monthSelect) return;
+        // ====== قسم التقرير المالي الشهري الجديد ======
+        function populateBillingCycleDates() {
+    const startDateInput = getEl('reportStartDate');
+    const endDateInput = getEl('reportEndDate');
+    if (!startDateInput || !endDateInput) return;
 
-    const currentYear = new Date().getFullYear();
-    const years = new Set([currentYear]);
-    (data.recentActivityLog || []).forEach(log => {
-        years.add(new Date(log.timestamp).getFullYear());
-    });
-
-    yearSelect.innerHTML = '';
-    Array.from(years).sort((a, b) => b - a).forEach(year => {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        yearSelect.appendChild(option);
-    });
-
-    const months = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-    monthSelect.innerHTML = '';
-    months.forEach((month, index) => {
-        const option = document.createElement('option');
-        option.value = index; // 0 for January, 1 for February, etc.
-        option.textContent = month;
-        monthSelect.appendChild(option);
-    });
-    // تحديد الشهر الحالي بشكل افتراضي
-    monthSelect.value = new Date().getMonth();
+    const today = new Date();
+    // تعيين تاريخ النهاية ليكون اليوم
+    endDateInput.value = today.toISOString().split('T')[0];
+    
+    // تعيين تاريخ البداية ليكون قبل شهر من اليوم
+    const lastMonth = new Date();
+    lastMonth.setMonth(today.getMonth() - 1);
+    startDateInput.value = lastMonth.toISOString().split('T')[0];
 }
 
-// 2. هذه الدالة يتم استدعاؤها عند الضغط على زر "إنشاء التقرير"
-function generateNewMonthlyReport() {
-    const year = parseInt(getEl('reportYearSelect').value);
-    const month = parseInt(getEl('reportMonthSelect').value);
-    
-    if (isNaN(year) || isNaN(month)) {
-        showAlert('يرجى اختيار سنة وشهر صالحين.', 'warning');
+        // يتم استدعاؤها عند الضغط على زر "إنشاء التقرير"
+        function generateNewBillingReport() {
+            const startDateValue = getEl('reportStartDate').value;
+            const endDateValue = getEl('reportEndDate').value;
+            
+            if (!startDateValue || !endDateValue) {
+                showAlert('يرجى تحديد تاريخ بدء ونهاية للتقرير.', 'warning');
+                return;
+            }
+            // نضيف يوماً لتاريخ النهاية ليشمل اليوم بالكامل
+            const startDate = new Date(startDateValue);
+            const endDate = new Date(endDateValue);
+            endDate.setHours(23, 59, 59, 999); // لضمان شمول اليوم الأخير كاملاً
+
+            const reportHtml = generateBillingCycleReport(startDate, endDate);
+            getEl('reportContent').innerHTML = reportHtml;
+        }
+
+        // هذه الدالة الأساسية التي تقوم بإنشاء التقرير
+        function generateBillingCycleReport(startDate, endDate) {
+            // فلترة سجل الأنشطة للحصول على الحلقات المنجزة ضمن الفترة المحددة فقط
+            const periodLogs = (data.recentActivityLog || []).filter(log => {
+                const logDate = new Date(log.timestamp);
+                return log.details && log.details.type === 'EPISODE_PROGRESS' &&
+                       logDate >= startDate && logDate <= endDate;
+            }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+            const memberData = {};
+
+            // تجميع بيانات العمل والأجور لهذه الفترة
+            periodLogs.forEach(log => {
+                const details = log.details;
+                const project = [...data.anime, ...data.series].find(p => p.id === details.projectId);
+                if (!project) return;
+                
+                Object.keys(details.team).forEach(roleKey => {
+                    const roleInfo = details.team[roleKey];
+                    if (roleInfo.id) {
+                        const memberId = roleInfo.id;
+
+                        if (!memberData[memberId]) {
+                            const member = data.members.find(m => m.id === memberId);
+                            if (!member) return;
+                            memberData[memberId] = {
+                                name: member.name,
+                                paymentMethod: member.paymentMethod || 'غير محدد',
+                                workDone: {},
+                                totalFeeAllTime: member.totalFee || 0,
+                                amountReceivedAllTime: member.amountReceived || 0,
+                            };
+                        }
+                        
+                        const workKey = `${project.id}_${roleKey}`;
+                        if (!memberData[memberId].workDone[workKey]) {
+                            memberData[memberId].workDone[workKey] = {
+                                projectName: project.name,
+                                role: roleToArabic(roleKey),
+                                episodesCount: 0,
+                                costPerEpisode: (roleInfo.price || 0)
+                            };
+                        }
+                        memberData[memberId].workDone[workKey].episodesCount += details.change;
+                    }
+                });
+            });
+
+            // إنشاء HTML للتقرير
+            const formattedStartDate = startDate.toLocaleDateString('ar-EG');
+            const formattedEndDate = new Date(endDate.getTime()).toLocaleDateString('ar-EG');
+            let html = `<div class="report-header"><h3>التقرير المالي لفترة الدفع من ${formattedStartDate} إلى ${formattedEndDate}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`;
+
+            let grandTotalThisPeriod = 0;
+            // حساب الأجور النهائية لكل عضو
+            for (const memberId in memberData) {
+                let memberEarningsThisPeriod = 0;
+                const member = memberData[memberId];
+                Object.values(member.workDone).forEach(work => {
+                    // تجاهل الأعمال التي محصلتها صفر (مثال: إضافة حلقة ثم حذفها)
+                    if (work.episodesCount !== 0) {
+                         work.totalEarnings = work.episodesCount * work.costPerEpisode;
+                         memberEarningsThisPeriod += work.totalEarnings;
+                    }
+                });
+                member.earningsThisPeriod = memberEarningsThisPeriod;
+                grandTotalThisPeriod += memberEarningsThisPeriod;
+            }
+
+            if (grandTotalThisPeriod === 0) {
+                 html += `<div class="report-section"><p class="text-muted text-center">لم يتم تسجيل أي عمل يستحق الدفع خلال هذه الفترة.</p></div>`;
+                return html;
+            }
+
+            html += `<div class="report-section"><h4><i class="fas fa-dollar-sign"></i> إجمالي المدفوعات لهذه الفترة</h4><p style="font-size: 1.5em; text-align: center;" class="money-positive">${formatMoney(grandTotalThisPeriod)}</p></div>`;
+
+            for (const memberId in memberData) {
+                const member = memberData[memberId];
+                if (member.earningsThisPeriod === 0) continue;
+
+                const totalOwedNow = (member.totalFeeAllTime - member.amountReceivedAllTime);
+                const previousBalance = totalOwedNow - member.earningsThisPeriod;
+                const paymentAmount = member.earningsThisPeriod; // المبلغ المقترح دفعه هو أجر هذه الفترة
+
+                html += `<div class="report-section"><h4><i class="fas fa-user"></i> ${member.name}</h4>`;
+                
+                html += `<h5>تفاصيل العمل المنجز في هذه الفترة</h5><div class="table-container"><table><thead><tr><th>العمل والدور</th><th>عدد الحلقات</th><th>التكلفة</th></tr></thead><tbody>`;
+                Object.values(member.workDone).filter(w => w.episodesCount !== 0).forEach(work => {
+                    html += `<tr>
+                                <td>${work.projectName} - ${work.role}</td>
+                                <td>${work.episodesCount}</td>
+                                <td class="${getMoneyClass(work.totalEarnings)}">${formatMoney(work.totalEarnings)}</td>
+                             </tr>`;
+                });
+                html += `</tbody></table></div>`;
+                
+                html += `<div style="margin-top: 20px;">
+                            <h5>الملخص المالي</h5>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);"><span>الرصيد السابق المستحق:</span> <strong class="${getMoneyClass(previousBalance)}">${formatMoney(previousBalance)}</strong></li>
+                                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);"><span>أجرة هذه الفترة:</span> <strong class="money-positive">${formatMoney(member.earningsThisPeriod)}</strong></li>
+                                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 1.2em;"><strong>المجموع الكلي المطلوب دفعه:</strong> <strong class="${getMoneyClass(totalOwedNow)}">${formatMoney(totalOwedNow)}</strong></li>
+                                <li style="display: flex; justify-content: space-between; padding: 8px 0;"><span>طريقة الدفع المسجلة:</span> <strong>${member.paymentMethod}</strong></li>
+                            </ul>
+                 </div>
+                 <div style="margin-top: 20px; text-align: left;">
+                    <button class="btn btn-success" id="pay-btn-${memberId}" onclick="recordPayment('${memberId}', ${paymentAmount})">
+                        <i class="fas fa-check-circle"></i> تسجيل دفعة (${formatMoney(paymentAmount)})
+                    </button>
+                 </div>`;
+                html += `</div>`;
+            }
+
+            return html;
+        }
+
+        // الدالة الجديدة لتسجيل الدفعة
+        async function recordPayment(memberId, amount) {
+    const member = data.members.find(m => m.id === memberId);
+    if (!member) return;
+
+    if (!confirm(`هل أنت متأكد من تسجيل دفعة بمبلغ ${formatMoney(amount)} للعضو ${member.name}؟`)) {
         return;
     }
 
-    const reportHtml = generateMonthlyFinancialReport(year, month);
-    getEl('reportContent').innerHTML = reportHtml;
-}
+    // <-- الخطوة 1: حفظ نسخة من بيانات العضو قبل التعديل
+    const memberBefore = JSON.parse(JSON.stringify(member));
+    // <-- الخطوة 2: إضافة الإجراء إلى مكدس التراجع
+    pushToUndoStack('RECORD_PAYMENT', { member: memberBefore }, `دفعة لـ ${member.name}`);
 
-// 3. هذه هي الدالة الأساسية التي تقوم بتجميع البيانات وتنسيقها (النسخة النهائية)
-function generateMonthlyFinancialReport(year, month) {
-    const startDate = new Date(year, month, 1);
-    const endDate = new Date(year, month + 1, 0, 23, 59, 59);
-
-    const monthlyLogs = (data.recentActivityLog || []).filter(log => {
-        const logDate = new Date(log.timestamp);
-        return log.details && log.details.type === 'EPISODE_PROGRESS' &&
-               logDate >= startDate && logDate <= endDate;
-    }).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // نرتب السجلات زمنياً لضمان معالجة الحذف بعد الإضافة
-
-    const memberData = {};
+    member.amountReceived = (member.amountReceived || 0) + amount;
     
-    // تجميع بيانات العمل والأجور مع معالجة الإضافة والحذف
-    monthlyLogs.forEach(log => {
-        const details = log.details;
-        const project = [...data.anime, ...data.series].find(p => p.id === details.projectId);
-        if (!project) return;
-        
-        Object.keys(details.team).forEach(roleKey => {
-            const roleInfo = details.team[roleKey];
-            if (roleInfo.id) {
-                const memberId = roleInfo.id;
-
-                if (!memberData[memberId]) {
-                    const member = data.members.find(m => m.id === memberId);
-                    if (!member) return;
-                    memberData[memberId] = {
-                        name: member.name,
-                        paymentMethod: member.paymentMethod || 'غير محدد',
-                        workDone: {}, // سنستخدم كائن لتجميع الأعمال
-                        totalFee: member.totalFee || 0,
-                        amountReceived: member.amountReceived || 0,
-                    };
-                }
-                
-                const workKey = `${project.id}_${roleKey}`;
-                if (!memberData[memberId].workDone[workKey]) {
-                    memberData[memberId].workDone[workKey] = {
-                        projectName: project.name,
-                        role: roleToArabic(roleKey),
-                        episodeNumbers: [],
-                        costPerEpisode: (roleInfo.price || 0)
-                    };
-                }
-                
-                if (details.change > 0) {
-                    // إضافة رقم الحلقة
-                    memberData[memberId].workDone[workKey].episodeNumbers.push(details.episodeNumber);
-                } else if (details.change < 0) {
-                    // حذف رقم الحلقة (الرقم المحذوف هو الرقم الذي كان الأخير)
-                    const episodeToRemove = details.episodeNumber + 1;
-                    const epIndex = memberData[memberId].workDone[workKey].episodeNumbers.indexOf(episodeToRemove);
-                    if (epIndex > -1) {
-                        memberData[memberId].workDone[workKey].episodeNumbers.splice(epIndex, 1);
-                    }
-                }
-            }
-        });
+    logRecentActivity(`تم تسجيل دفعة للعضو ${member.name}`, {
+        type: 'PAYMENT_MADE',
+        memberId: memberId,
+        amount: amount
     });
-
-    // إنشاء HTML
-    const monthName = new Date(year, month).toLocaleString('ar-SA', { month: 'long', year: 'numeric' });
-    let html = `<div class="report-header"><h3>التقرير المالي للمدفوعات - ${monthName}</h3><p>تاريخ الإنشاء: ${new Date().toLocaleDateString('ar-EG', { dateStyle: 'full' })}</p></div>`;
-
-    let grandTotalThisMonth = 0;
-    // حساب الأجور النهائية وبناء التقرير
-    for (const memberId in memberData) {
-        let memberEarningsThisMonth = 0;
-        const member = memberData[memberId];
-
-        Object.values(member.workDone).forEach(work => {
-            work.totalEarnings = work.episodeNumbers.length * work.costPerEpisode;
-            memberEarningsThisMonth += work.totalEarnings;
-        });
+    
+    unsavedChanges = true;
+    const success = await saveData();
+    
+    if (success) {
+        showAlert('تم تسجيل الدفعة بنجاح!', 'success');
         
-        member.earningsThisMonth = memberEarningsThisMonth;
-        grandTotalThisMonth += memberEarningsThisMonth;
+        const payButton = getEl(`pay-btn-${memberId}`);
+        if(payButton) {
+            payButton.innerHTML = `<i class="fas fa-check"></i> تم الدفع`;
+            payButton.disabled = true;
+        }
+
+        // إعادة توليد التقرير وعرض البيانات المحدثة
+        generateNewBillingReport();
+        updateDashboard();
+        updateCardInDOM('member', memberId, member);
+    } else {
+        // إذا فشل الحفظ، تراجع عن التغيير
+        member.amountReceived -= amount;
+        unsavedChanges = true;
+        showAlert('فشل تسجيل الدفعة.', 'danger');
+
+        // <-- الخطوة 3: إزالة الإجراء من مكدس التراجع لأنه لم يتم حفظه
+        undoStack.pop(); 
+        updateUndoButtonState();
     }
-
-    if (grandTotalThisMonth === 0 && Object.keys(memberData).every(mid => memberData[mid].earningsThisMonth === 0)) {
-         html += `<div class="report-section"><p class="text-muted text-center">لا يوجد نشاط مسجل يتضمن أجورًا للأعضاء في هذا الشهر.</p></div>`;
-        return html;
-    }
-
-    html += `<div class="report-section"><h4><i class="fas fa-dollar-sign"></i> الإجمالي الكلي لهذا الشهر</h4><p style="font-size: 1.5em; text-align: center;" class="money-positive">${formatMoney(grandTotalThisMonth)}</p></div>`;
-
-    // تفاصيل كل عضو
-    for (const memberId in memberData) {
-        const member = memberData[memberId];
-        if(member.earningsThisMonth === 0) continue; // تخطي الأعضاء الذين ليس لديهم أجر هذا الشهر
-        
-        const totalOwed = (member.totalFee - member.amountReceived);
-        const previousBalance = totalOwed - member.earningsThisMonth;
-        
-        html += `<div class="report-section"><h4><i class="fas fa-user"></i> ${member.name}</h4>`;
-        
-        html += `<h5>تفاصيل العمل المنجز هذا الشهر</h5><div class="table-container"><table><thead><tr><th>العمل والدور</th><th>أرقام الحلقات</th><th>التكلفة</th></tr></thead><tbody>`;
-        Object.values(member.workDone).filter(w => w.episodeNumbers.length > 0).forEach(work => {
-            const sortedEpisodes = work.episodeNumbers.sort((a,b) => a - b).join(', ');
-            html += `<tr>
-                        <td>${work.projectName} - ${work.role}</td>
-                        <td>${sortedEpisodes || 'غير مسجل'}</td>
-                        <td class="${getMoneyClass(work.totalEarnings)}">${formatMoney(work.totalEarnings)}</td>
-                     </tr>`;
-        });
-        html += `</tbody></table></div>`;
-        
-        html += `<div style="margin-top: 20px;">
-                    <h5>الملخص المالي</h5>
-                    <ul style="list-style: none; padding: 0;">
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);"><span>أجرة هذا الشهر:</span> <strong class="money-positive">${formatMoney(member.earningsThisMonth)}</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color);"><span>الأجر المتبقي من أشهر سابقة:</span> <strong class="${getMoneyClass(previousBalance)}">${formatMoney(previousBalance)}</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 1.2em;"><strong>المجموع المطلوب دفعه:</strong> <strong class="${getMoneyClass(totalOwed)}">${formatMoney(totalOwed)}</strong></li>
-                        <li style="display: flex; justify-content: space-between; padding: 8px 0;"><span>طريقة الدفع المسجلة:</span> <strong>${member.paymentMethod}</strong></li>
-                    </ul>
-                 </div>`;
-        html += `</div>`;
-    }
-
-    return html;
 }
     </script>
 </body>
